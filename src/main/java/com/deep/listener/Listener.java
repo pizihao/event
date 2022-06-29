@@ -10,7 +10,7 @@ import java.util.EventListener;
  * @author Create by liuwenhao on 2022/6/28 13:45
  */
 @FunctionalInterface
-public interface Listener<T extends Event> extends EventListener {
+public interface Listener<E extends Event, T extends Event> extends EventListener {
 
     /**
      * <h2>事件的执行</h2>
@@ -21,6 +21,6 @@ public interface Listener<T extends Event> extends EventListener {
      * @author liuwenhao
      * @date 2022/6/28 17:01
      */
-    <E extends Event> E execEvent(T t);
+    E execEvent(T t);
 
 }
