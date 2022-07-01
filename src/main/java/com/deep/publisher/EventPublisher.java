@@ -1,7 +1,7 @@
-package com.deep.publish;
+package com.deep.publisher;
 
 /**
- * <h2>事件发布中心</h2>
+ * <h2>事件发布</h2>
  *
  * @author Create by liuwenhao on 2022/6/28 17:21
  */

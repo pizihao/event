@@ -1,7 +1,7 @@
 package com.deep.context;
 
 import com.deep.listener.Listener;
-import com.deep.publish.EventPublisher;
+import com.deep.publisher.EventPublisher;
 
 import java.lang.reflect.Type;
 import java.util.Set;
