@@ -55,6 +55,15 @@ public class DefaultEventContext implements EventContext {
         }
     }
 
+    /**
+     * 通过代理类来实现事件的顺延发布，当监听器执行结果为null或当前事件本身时不再进行顺延，
+     * 即执行结果必须是完完全全的本身，其对比方式为 {@link Objects#equals(Object, Object)}，
+     * 故可以通过重写equals来影响判断结果。
+     * 理论上来讲事件可以无限顺延下去，直到栈溢出。
+     *
+     * @param listeners 监听器
+     * @param event     事件对象
+     */
     void newProxy(Set<Listener> listeners, Event event) {
         DefaultEventContextProxy contextProxy = new DefaultEventContextProxy(name, listeners, event);
         try {
@@ -119,7 +128,8 @@ public class DefaultEventContext implements EventContext {
     static class EventBindMap {
 
         /**
-         * 存储可以直接声明的监听器
+         * 存储所有的监听器，如果采用注解的方式直接在方法上声明的监听器则会通过动态代理为其生成一个Listener对象。
+         * 这是为了在发布事件阶段上下文拿到的监听器一定是Listener或Listener的实现类
          */
         Map<Type, Set<Listener>> map = new ConcurrentHashMap<>();
 

@@ -27,6 +27,12 @@ public class DefaultEventContextProxy extends DefaultEventContext {
         this.event = event;
     }
 
+    /**
+     * 实现事件的顺延，即重新发布一个事件
+     *
+     * @author liuwenhao
+     * @date 2022/7/1 16:33
+     */
     void doInvoke() throws ExecutionException, InterruptedException {
         for (Listener listener : listeners) {
             publishEvents(listener.execEvent(event));
@@ -34,6 +40,14 @@ public class DefaultEventContextProxy extends DefaultEventContext {
 
     }
 
+    /**
+     * 对事件类型的控制。
+     * 包括CompletionStage和Future的额外处理，因为其真正的对象是计算结果，而不是本身
+     *
+     * @param o 事件
+     * @author liuwenhao
+     * @date 2022/7/1 16:34
+     */
     private void publishEvents(Object o) throws ExecutionException, InterruptedException {
 
         if (o instanceof CompletionStage) {
@@ -50,6 +64,13 @@ public class DefaultEventContextProxy extends DefaultEventContext {
 
     }
 
+    /**
+     * 对集合或数组的额外处理，集合中的每一个元素都会触发一次事件执行
+     *
+     * @param o 事件
+     * @author liuwenhao
+     * @date 2022/7/1 16:36
+     */
     private void publishEvent(Object o) {
 
         if (o.getClass().isArray()) {
