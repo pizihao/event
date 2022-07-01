@@ -1,7 +1,5 @@
 package com.deep.listener;
 
-import com.deep.event.Event;
-
 import java.util.EventListener;
 
 /**
@@ -10,7 +8,7 @@ import java.util.EventListener;
  * @author Create by liuwenhao on 2022/6/28 13:45
  */
 @FunctionalInterface
-public interface Listener<E extends Event, T extends Event> extends EventListener {
+public interface Listener extends EventListener {
 
     /**
      * <h2>事件的执行</h2>
@@ -21,6 +19,6 @@ public interface Listener<E extends Event, T extends Event> extends EventListene
      * @author liuwenhao
      * @date 2022/6/28 17:01
      */
-    E execEvent(T t);
+    Object execEvent(Object t);
 
 }

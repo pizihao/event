@@ -6,7 +6,7 @@ package com.deep.publish;
  * @author Create by liuwenhao on 2022/6/28 17:21
  */
 @FunctionalInterface
-public interface EventPublish {
+public interface EventPublisher {
 
     /**
      * 发布事件
