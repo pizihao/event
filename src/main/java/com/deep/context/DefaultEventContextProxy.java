@@ -11,7 +11,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
- * <h2>带有事件链的静态代理</h2>
+ * <h2>带有事件顺延的静态代理</h2>
  *
  * @author Create by liuwenhao on 2022/7/1 15:28
  */

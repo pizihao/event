@@ -16,7 +16,7 @@ public abstract class Event extends EventObject {
      * @param source The object on which the Event initially occurred.
      * @throws IllegalArgumentException if source is null.
      */
-    Event(Object source) {
+    protected Event(Object source) {
         super(source);
     }
 }
