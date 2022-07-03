@@ -21,8 +21,9 @@ public class DefaultEventContextProxy extends DefaultEventContext {
 
     Event event;
 
-    public DefaultEventContextProxy(String name, Set<Listener> listeners, Event event) {
+    public DefaultEventContextProxy(String name, Set<Listener> listeners, Event event, EventBindMap eventBindMap) {
         super(name);
+        this.eventBindMap.map = eventBindMap.map;
         this.listeners = listeners;
         this.event = event;
     }

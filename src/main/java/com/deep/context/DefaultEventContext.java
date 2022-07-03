@@ -2,6 +2,7 @@ package com.deep.context;
 
 import com.deep.event.Event;
 import com.deep.event.FakeEvent;
+import com.deep.exception.EventException;
 import com.deep.listener.Listener;
 
 import java.lang.reflect.Type;
@@ -42,14 +43,14 @@ public class DefaultEventContext implements EventContext {
             return;
         }
         Event event;
-        // o必须在前面
-        if (o.getClass().isAssignableFrom(Event.class)) {
+        // o必须在后面
+        if (Event.class.isAssignableFrom(o.getClass())) {
             event = (Event) o;
         } else {
             event = new FakeEvent<>(this, o);
         }
         // 得到所有的监听器
-        Set<Listener> listeners = getListeners(event.getClass());
+        Set<Listener> listeners = getListeners(o.getClass());
         if (!listeners.isEmpty()) {
             newProxy(listeners, event);
         }
@@ -65,13 +66,35 @@ public class DefaultEventContext implements EventContext {
      * @param event     事件对象
      */
     void newProxy(Set<Listener> listeners, Event event) {
-        DefaultEventContextProxy contextProxy = new DefaultEventContextProxy(name, listeners, event);
+        DefaultEventContextProxy contextProxy = new DefaultEventContextProxy(name, listeners, event, eventBindMap);
         try {
             contextProxy.doInvoke();
         } catch (ExecutionException | InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException(e);
+            throw new EventException(e);
         }
+    }
+
+    @Override
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        DefaultEventContext that = (DefaultEventContext) o;
+        return Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 
     /**
@@ -83,10 +106,11 @@ public class DefaultEventContext implements EventContext {
     public void addListener(Type type, Listener listener) {
         synchronized (eventBindMap) {
             Set<Listener> listeners = eventBindMap.map.get(type);
-            if (listener == null) {
+            if (listeners == null) {
                 listeners = new HashSet<>();
             }
             listeners.add(listener);
+            eventBindMap.map.put(type, listeners);
         }
     }
 
@@ -99,14 +123,23 @@ public class DefaultEventContext implements EventContext {
     public void remove(Type type, Listener listener) {
         synchronized (eventBindMap) {
             Set<Listener> listeners = eventBindMap.map.get(type);
-            listeners.remove(listener);
+            if (Objects.nonNull(listeners)) {
+                listeners.remove(listener);
+            }
+        }
+    }
+
+    @Override
+    public void clean() {
+        synchronized (eventBindMap) {
+            eventBindMap.map.clear();
         }
     }
 
     /**
      * 获取所有的监听器
      */
-    public Set<Listener> getListeners() {
+    public List<Listener> getListeners() {
         return eventBindMap.getListeners();
     }
 
@@ -133,17 +166,21 @@ public class DefaultEventContext implements EventContext {
          */
         Map<Type, Set<Listener>> map = new ConcurrentHashMap<>();
 
-        public final Set<Listener> getListeners() {
+        public final List<Listener> getListeners() {
             return map.values().stream()
                 .flatMap(Collection::stream)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
         }
 
         public final Set<Listener> getListeners(Type type) {
-            if (type == null) {
+            if (Objects.isNull(type)) {
                 return Collections.emptySet();
             }
-            return new HashSet<>(map.get(type));
+            Set<Listener> listeners = map.get(type);
+            if (Objects.isNull(listeners)) {
+                return Collections.emptySet();
+            }
+            return new HashSet<>(listeners);
         }
 
     }

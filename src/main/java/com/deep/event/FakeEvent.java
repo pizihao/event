@@ -39,4 +39,10 @@ public class FakeEvent<E> extends Event {
     public int hashCode() {
         return Objects.hash(event, event.getClass());
     }
+
+    @Override
+    public String toString() {
+        return event.toString();
+    }
+
 }

@@ -1,9 +1,12 @@
 package com.deep.context;
 
+import com.deep.event.FakeEvent;
 import com.deep.listener.Listener;
 import com.deep.publisher.EventPublisher;
 
 import java.lang.reflect.Type;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -13,6 +16,12 @@ import java.util.Set;
  * @author Create by liuwenhao on 2022/6/29 10:53
  */
 public interface EventContext extends EventPublisher {
+
+
+    /**
+     * 提取上下文的唯一标识
+     */
+    String name();
 
     /**
      * 为一个事件添加监听器
@@ -31,9 +40,15 @@ public interface EventContext extends EventPublisher {
     void remove(Type type, Listener listener);
 
     /**
-     * 获取所有的监听器
+     * 清空当前上下文
      */
-    Set<Listener> getListeners();
+    void clean();
+
+    /**
+     * 获取所有的监听器，
+     * 得到的监听器仅用于操作，其无法获知监听的具体事件
+     */
+    List<Listener> getListeners();
 
     /**
      * 获取一个事件所有的监听器

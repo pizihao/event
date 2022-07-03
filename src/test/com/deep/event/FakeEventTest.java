@@ -5,7 +5,7 @@ import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class FakeEventTest extends TestCase {
+public class FakeEventTest {
 
     @Test
     public void testFakeEvent() {
