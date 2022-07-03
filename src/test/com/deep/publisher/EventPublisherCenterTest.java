@@ -4,12 +4,15 @@ package com.deep.publisher;
 import com.deep.context.DefaultEventContext;
 import com.deep.context.EventContext;
 import com.deep.event.AddEvent;
-import com.deep.listener.AddListener;
-import com.deep.listener.Listener;
+import com.deep.event.RemoveEvent;
+import com.deep.listener.*;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class EventPublisherCenterTest {
 
@@ -72,5 +75,29 @@ public class EventPublisherCenterTest {
         List<Listener> listener2 = context2.getListeners();
         Assert.assertNull(context1);
         Assert.assertEquals(1, listener2.size());
+    }
+
+    @Test
+    public void testTestAddListener1() {
+        EventPublisherCenter center = new EventPublisherCenter();
+        NonListener listener = new NonListener();
+        List<Method> collect = Arrays.stream(listener.getClass().getDeclaredMethods())
+            .filter(m -> m.getAnnotation(EventListener.class) != null)
+            .collect(Collectors.toList());
+
+        collect.forEach(method -> {
+            EventListener eventListener = method.getAnnotation(EventListener.class);
+            center.addListener("测试", eventListener, listener, method);
+        });
+        AddEvent addEvent = new AddEvent(this, "注解方式");
+        RemoveListener removeListener = new RemoveListener();
+        center.addListener("测试", removeListener, RemoveEvent.class);
+
+        center.publish("测试", addEvent);
+
+    }
+
+    @Test
+    public void testTestAddListener2() {
     }
 }

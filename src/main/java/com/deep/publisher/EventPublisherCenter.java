@@ -4,11 +4,12 @@ import com.deep.context.DefaultEventContext;
 import com.deep.context.EventContext;
 import com.deep.event.Event;
 import com.deep.exception.EventException;
+import com.deep.listener.EventListener;
 import com.deep.listener.Listener;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.*;
 
 /**
  * <h2>事件发布中心</h2>
@@ -70,6 +71,57 @@ class EventPublisherCenter {
         }
         map.put(name, eventContext);
         eventContext.addListener(eventCls, t);
+    }
+
+    /**
+     * 为一个上下文添加监听器
+     * 如果上下文不存在则添加
+     *
+     * @param name     上下文名称
+     * @param listener 声明注解
+     * @param o        监听器对象
+     * @param method   监听器执行方法
+     */
+    public void addListener(String name, EventListener listener, Object o, Method method) {
+        Listener l = newListenerProxy(o, method);
+        addListener(name, l, listener.value());
+    }
+
+    /**
+     * 为一个上下文添加监听器
+     *
+     * @param listener 声明注解
+     * @param o        监听器对象
+     * @param method   监听器执行方法
+     */
+    public void addListener(EventListener listener, Object o, Method method) {
+        Listener l = newListenerProxy(o, method);
+        addListener(l, listener.value());
+    }
+
+    /**
+     * 生成一个Listener代理类
+     *
+     * @param o      代理的对象
+     * @param method 需要被代理的方法
+     * @return 监听器代理类
+     */
+    private Listener newListenerProxy(Object o, Method method) {
+        Class<?>[] classes = {Listener.class};
+        ClassLoader classLoader = this.getClass().getClassLoader();
+        return (Listener) Proxy.newProxyInstance(
+            classLoader,
+            classes,
+            (p, m, a) -> {
+                if ("execEvent".equals(m.getName())) {
+                    return method.invoke(o, a);
+                }
+                if (refuseGroup.contains(m.getName())) {
+                    return m.invoke(o, a);
+                }
+                return null;
+            }
+        );
     }
 
     /**
@@ -147,6 +199,17 @@ class EventPublisherCenter {
             throw new EventException("未声明过该上下文  - " + name);
         }
         eventContext.publish(event);
+    }
+
+
+    static List<String> refuseGroup = new ArrayList<>();
+
+    static {
+        refuseGroup.add("hashCode");
+        refuseGroup.add("equals");
+        refuseGroup.add("clone");
+        refuseGroup.add("toString");
+        refuseGroup.add("finalize");
     }
 
 }
