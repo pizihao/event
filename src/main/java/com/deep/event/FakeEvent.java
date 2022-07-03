@@ -11,7 +11,7 @@ import java.util.Objects;
  */
 public class FakeEvent<E> extends Event {
 
-    E event;
+    transient E event;
 
     public FakeEvent(Object source, E event) {
         super(source);

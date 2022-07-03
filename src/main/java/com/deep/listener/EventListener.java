@@ -4,6 +4,9 @@ import com.deep.event.Event;
 
 import java.lang.annotation.*;
 
+/**
+ * 添加监听器的注解，可以作用于方法上，其执行方法的参数只能是其监听的事件类型，否则会抛出异常
+ */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented

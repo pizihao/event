@@ -11,7 +11,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
- * <h2>带有事件顺延的静态代理</h2>
+ * 带有事件顺延的静态代理，如果某个监听器的返回值仍然是已经监控的事件类型，那么事件将会继续转发。
+ * 如果出现循环，则这种机制会一直传播下去，直到栈溢出
  *
  * @author Create by liuwenhao on 2022/7/1 15:28
  */
@@ -101,5 +102,15 @@ public class DefaultEventContextProxy extends DefaultEventContext {
         } else {
             publish(o);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        return super.equals(o);
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

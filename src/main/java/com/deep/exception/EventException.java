@@ -1,7 +1,7 @@
 package com.deep.exception;
 
 /**
- * <h2></h2>
+ * 事件异常
  *
  * @author Create by liuwenhao on 2022/7/3 12:16
  */
