@@ -4,6 +4,7 @@ import com.deep.event.Event;
 import com.deep.event.FakeEvent;
 import com.deep.exception.EventException;
 import com.deep.listener.Listener;
+import com.deep.listener.OrderListenerDecorate;
 
 import java.lang.reflect.Type;
 import java.util.*;
@@ -50,7 +51,7 @@ public class DefaultEventContext implements EventContext {
             event = new FakeEvent<>(this, o);
         }
         // 得到所有的监听器
-        Set<Listener> listeners = getListeners(o.getClass());
+        List<Listener> listeners = getListeners(o.getClass());
         if (!listeners.isEmpty()) {
             newProxy(listeners, event);
         }
@@ -65,7 +66,7 @@ public class DefaultEventContext implements EventContext {
      * @param listeners 监听器
      * @param event     事件对象
      */
-    void newProxy(Set<Listener> listeners, Event event) {
+    void newProxy(List<Listener> listeners, Event event) {
         DefaultEventContextProxy contextProxy = new DefaultEventContextProxy(name, listeners, event, eventBindMap);
         try {
             contextProxy.doInvoke();
@@ -109,6 +110,10 @@ public class DefaultEventContext implements EventContext {
             if (listeners == null) {
                 listeners = new HashSet<>();
             }
+            // 对监听器进行包装
+            if (!(listener instanceof OrderListenerDecorate)) {
+                listener = new OrderListenerDecorate(listener);
+            }
             listeners.add(listener);
             eventBindMap.map.put(type, listeners);
         }
@@ -124,7 +129,7 @@ public class DefaultEventContext implements EventContext {
         synchronized (eventBindMap) {
             Set<Listener> listeners = eventBindMap.map.get(type);
             if (Objects.nonNull(listeners)) {
-                listeners.remove(listener);
+                listeners.remove(getListenerDecorate(listener));
             }
         }
     }
@@ -146,7 +151,7 @@ public class DefaultEventContext implements EventContext {
     /**
      * 获取一个事件所有的监听器
      */
-    public Set<Listener> getListeners(Type type) {
+    public List<Listener> getListeners(Type type) {
         return eventBindMap.getListeners(type);
     }
 
@@ -169,19 +174,41 @@ public class DefaultEventContext implements EventContext {
         public final List<Listener> getListeners() {
             return map.values().stream()
                 .flatMap(Collection::stream)
+                .map(DefaultEventContext::getListenerDecorate)
+                .sorted()
+                .map(OrderListenerDecorate::getListener)
                 .collect(Collectors.toList());
         }
 
-        public final Set<Listener> getListeners(Type type) {
+        public final List<Listener> getListeners(Type type) {
             if (Objects.isNull(type)) {
-                return Collections.emptySet();
+                return Collections.emptyList();
             }
             Set<Listener> listeners = map.get(type);
             if (Objects.isNull(listeners)) {
-                return Collections.emptySet();
+                return Collections.emptyList();
             }
-            return new HashSet<>(listeners);
+            return listeners.stream()
+                .map(DefaultEventContext::getListenerDecorate)
+                .sorted()
+                .map(OrderListenerDecorate::getListener)
+                .collect(Collectors.toList());
         }
 
+
+    }
+
+
+    /**
+     * 将listener转化为OrderListenerDecorate
+     * 如果无法强制转化则创建实例
+     *
+     * @param listener listener
+     * @return OrderListenerDecorate
+     */
+    protected static OrderListenerDecorate getListenerDecorate(Listener listener) {
+        return listener instanceof OrderListenerDecorate
+            ? (OrderListenerDecorate) listener
+            : new OrderListenerDecorate(listener);
     }
 }

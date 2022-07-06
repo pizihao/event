@@ -5,6 +5,7 @@ import com.deep.listener.Listener;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
@@ -18,11 +19,11 @@ import java.util.concurrent.Future;
  */
 public class DefaultEventContextProxy extends DefaultEventContext {
 
-    Set<Listener> listeners;
+    List<Listener> listeners;
 
     Event event;
 
-    public DefaultEventContextProxy(String name, Set<Listener> listeners, Event event, EventBindMap eventBindMap) {
+    public DefaultEventContextProxy(String name, List<Listener> listeners, Event event, EventBindMap eventBindMap) {
         super(name);
         this.eventBindMap.map = eventBindMap.map;
         this.listeners = listeners;

@@ -5,7 +5,6 @@ import com.deep.publisher.EventPublisher;
 
 import java.lang.reflect.Type;
 import java.util.List;
-import java.util.Set;
 
 /**
  * 事件上下文
@@ -51,6 +50,6 @@ public interface EventContext extends EventPublisher {
     /**
      * 获取一个事件所有的监听器
      */
-    Set<Listener> getListeners(Type type);
+    List<Listener> getListeners(Type type);
 
 }

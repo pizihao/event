@@ -6,6 +6,7 @@ import com.deep.event.Event;
 import com.deep.exception.EventException;
 import com.deep.listener.EventListener;
 import com.deep.listener.Listener;
+import com.deep.listener.OrderListenerDecorate;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -84,7 +85,8 @@ class EventPublisherCenter {
      */
     public void addListener(String name, EventListener listener, Object o, Method method) {
         Listener l = newListenerProxy(o, method);
-        addListener(name, l, listener.value());
+        OrderListenerDecorate listenerDecorate = new OrderListenerDecorate(listener.order(), l);
+        addListener(name, listenerDecorate, listener.value());
     }
 
     /**

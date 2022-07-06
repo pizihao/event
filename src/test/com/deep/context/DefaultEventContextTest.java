@@ -10,7 +10,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.Set;
 
 public class DefaultEventContextTest {
 
@@ -19,7 +18,7 @@ public class DefaultEventContextTest {
         EventContext eventContext = new DefaultEventContext("测试");
         AddListener listenerTest = new AddListener();
         eventContext.addListener(AddEvent.class, listenerTest);
-        Set<Listener> listeners = eventContext.getListeners(AddEvent.class);
+        List<Listener> listeners = eventContext.getListeners(AddEvent.class);
         Assert.assertTrue(listeners.contains(listenerTest));
     }
 
@@ -32,7 +31,7 @@ public class DefaultEventContextTest {
         eventContext.addListener(AddEvent.class, listenerTest1);
         eventContext.addListener(AddEvent.class, listenerTest2);
         eventContext.addListener(RemoveEvent.class, listenerTest2);
-        Set<Listener> listeners = eventContext.getListeners(AddEvent.class);
+        List<Listener> listeners = eventContext.getListeners(AddEvent.class);
         List<Listener> listeners1 = eventContext.getListeners();
         Assert.assertEquals(2, listeners.size());
         Assert.assertEquals(3, listeners1.size());
