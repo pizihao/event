@@ -1,10 +1,9 @@
-package com.deep.context;
+package com.deep.sparrow.context;
 
-import com.deep.event.AddEvent;
-import com.deep.event.RemoveEvent;
-import com.deep.listener.AddListener;
-import com.deep.listener.CollListener;
-import com.deep.listener.RemoveListener;
+import com.deep.sparrow.event.AddEvent;
+import com.deep.sparrow.event.RemoveEvent;
+import com.deep.sparrow.listener.CollListener;
+import com.deep.sparrow.listener.RemoveListener;
 import org.junit.Test;
 
 public class DefaultEventContextProxyTest {

@@ -1,7 +1,8 @@
-package com.deep.listener;
+package com.deep.sparrow.listener;
 
-import com.deep.event.AddEvent;
-import com.deep.event.RemoveEvent;
+
+import com.deep.sparrow.event.AddEvent;
+import com.deep.sparrow.event.RemoveEvent;
 
 /**
  * <h2></h2>

@@ -1,6 +1,7 @@
-package com.deep.listener;
+package com.deep.sparrow.listener;
 
-import com.deep.event.RemoveEvent;
+
+import com.deep.sparrow.event.RemoveEvent;
 
 public class AddListener implements Listener {
 

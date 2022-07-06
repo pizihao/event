@@ -1,4 +1,4 @@
-package com.deep.context;
+package com.deep.sparrow.context;
 
 import com.deep.sparrow.listener.Listener;
 import com.deep.sparrow.publisher.EventPublisher;

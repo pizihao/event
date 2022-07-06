@@ -1,7 +1,7 @@
 package com.deep.sparrow.publisher;
 
-import com.deep.context.DefaultEventContext;
-import com.deep.context.EventContext;
+import com.deep.sparrow.context.DefaultEventContext;
+import com.deep.sparrow.context.EventContext;
 import org.junit.Assert;
 import org.junit.Test;
 

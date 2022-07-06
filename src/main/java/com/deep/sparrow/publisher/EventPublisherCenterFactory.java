@@ -1,6 +1,6 @@
 package com.deep.sparrow.publisher;
 
-import com.deep.context.EventContext;
+import com.deep.sparrow.context.EventContext;
 
 import java.util.Map;
 

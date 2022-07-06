@@ -1,7 +1,5 @@
-package com.deep.event;
+package com.deep.sparrow.event;
 
-import com.deep.listener.Listener;
-import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
 

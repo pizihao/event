@@ -1,11 +1,11 @@
 package com.deep.sparrow.publisher;
 
 
-import com.deep.context.DefaultEventContext;
-import com.deep.context.EventContext;
-import com.deep.event.AddEvent;
-import com.deep.event.RemoveEvent;
-import com.deep.listener.*;
+import com.deep.sparrow.context.DefaultEventContext;
+import com.deep.sparrow.context.EventContext;
+import com.deep.sparrow.event.AddEvent;
+import com.deep.sparrow.event.RemoveEvent;
+import com.deep.sparrow.listener.*;
 import org.junit.Assert;
 import org.junit.Test;
 

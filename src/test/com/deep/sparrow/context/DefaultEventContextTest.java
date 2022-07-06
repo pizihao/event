@@ -1,11 +1,11 @@
-package com.deep.context;
+package com.deep.sparrow.context;
 
-import com.deep.event.AddEvent;
-import com.deep.event.AddFakeEvent;
-import com.deep.event.RemoveEvent;
-import com.deep.listener.Listener;
-import com.deep.listener.AddListener;
-import com.deep.listener.RemoveListener;
+import com.deep.sparrow.event.AddEvent;
+import com.deep.sparrow.event.AddFakeEvent;
+import com.deep.sparrow.event.RemoveEvent;
+import com.deep.sparrow.listener.AddListener;
+import com.deep.sparrow.listener.Listener;
+import com.deep.sparrow.listener.RemoveListener;
 import org.junit.Assert;
 import org.junit.Test;
 

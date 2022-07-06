@@ -1,6 +1,6 @@
-package com.deep.context;
+package com.deep.sparrow.context;
 
-import com.deep.event.Event;
+import com.deep.sparrow.event.Event;
 import com.deep.sparrow.listener.Listener;
 
 import java.lang.reflect.Array;

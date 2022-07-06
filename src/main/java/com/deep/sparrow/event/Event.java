@@ -1,4 +1,4 @@
-package com.deep.event;
+package com.deep.sparrow.event;
 
 
 import java.util.EventObject;

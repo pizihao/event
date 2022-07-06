@@ -1,16 +1,15 @@
-package com.deep.event;
+package com.deep.sparrow.event;
 
 /**
- * <h2></h2>
+ * <h2>添加伪事件</h2>
  *
- * @author Create by liuwenhao on 2022/7/3 13:48
+ * @author Create by liuwenhao on 2022/6/29 17:41
  */
-public class RemoveEvent extends Event {
+public class AddFakeEvent {
 
-    String name ;
+    String name;
 
-    public RemoveEvent(Object source, String name) {
-        super(source);
+    public AddFakeEvent(String name) {
         this.name = name;
     }
 
@@ -24,7 +23,7 @@ public class RemoveEvent extends Event {
 
     @Override
     public String toString() {
-        return "RemoveEvent{" +
+        return "AddFakeEvent{" +
             "name='" + name + '\'' +
             '}';
     }
