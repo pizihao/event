@@ -1,4 +1,4 @@
-package com.deep.publisher;
+package com.deep.sparrow.publisher;
 
 /**
  * <h2>事件发布</h2>

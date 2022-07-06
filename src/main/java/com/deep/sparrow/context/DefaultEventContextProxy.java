@@ -1,7 +1,7 @@
 package com.deep.context;
 
 import com.deep.event.Event;
-import com.deep.listener.Listener;
+import com.deep.sparrow.listener.Listener;
 
 import java.lang.reflect.Array;
 import java.util.Collection;

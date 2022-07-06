@@ -1,4 +1,4 @@
-package com.deep.publisher;
+package com.deep.sparrow.publisher;
 
 import com.deep.context.DefaultEventContext;
 import com.deep.context.EventContext;
