@@ -23,7 +23,7 @@ public @interface EventListener {
     boolean isAsync() default false;
 
     /**
-     * 监听器优先度，order越大。优先度越低，最小为0，小于0的视为无效事件
+     * 监听器优先度，order越大。优先度越低
      */
     int order() default 0;
 
