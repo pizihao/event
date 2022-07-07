@@ -50,7 +50,9 @@ public class AsyncListenerDecorate implements Listener {
     public ThreadPoolExecutor getExecutor() {
         ThreadPoolExecutor poolExecutor = ExecutorUtil.idleService(poolExecutors);
 
-        return Objects.isNull(poolExecutor) ? (ThreadPoolExecutor) Executors.newSingleThreadExecutor() : poolExecutor;
+        return Objects.isNull(poolExecutor)
+            ? (ThreadPoolExecutor) Executors.newFixedThreadPool(1)
+            : poolExecutor;
     }
 
     public OrderListenerDecorate getListener() {

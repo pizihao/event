@@ -44,6 +44,7 @@ public class DefaultEventContextProxy extends DefaultEventContext {
                 AsyncListenerDecorate asyncListenerDecorate = (AsyncListenerDecorate) listener;
                 ThreadPoolExecutor executor = asyncListenerDecorate.getExecutor();
                 executor.execute(() -> doExec(listener));
+                executor.shutdown();
             } else {
                 doExec(listener);
             }
@@ -54,6 +55,7 @@ public class DefaultEventContextProxy extends DefaultEventContext {
         try {
             publishEvents(listener.execEvent(event));
         } catch (ExecutionException | InterruptedException e) {
+            Thread.currentThread().interrupt();
             throw new EventException(e);
         }
     }
@@ -67,11 +69,13 @@ public class DefaultEventContextProxy extends DefaultEventContext {
      * @date 2022/7/1 16:34
      */
     private void publishEvents(Object o) throws ExecutionException, InterruptedException {
-
+        if (o == null){
+            return;
+        }
         if (o instanceof CompletionStage) {
             ((CompletionStage<?>) o).thenAccept(e -> {
                 if (e != null) {
-                    publish(event);
+                    publish(e);
                 }
             });
         } else if (o instanceof Future) {

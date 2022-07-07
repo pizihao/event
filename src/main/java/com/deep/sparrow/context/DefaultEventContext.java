@@ -189,8 +189,7 @@ public class DefaultEventContext implements EventContext {
                     OrderListenerDecorate fListener = getOrderListenerDecorate(f);
                     OrderListenerDecorate lListener = getOrderListenerDecorate(l);
                     return fListener.compareTo(lListener);
-                }).map(a -> getOrderListenerDecorate(a).getListener())
-                .collect(Collectors.toList());
+                }).collect(Collectors.toList());
         }
 
     }

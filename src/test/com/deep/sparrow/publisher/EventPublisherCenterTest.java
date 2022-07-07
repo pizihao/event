@@ -12,6 +12,7 @@ import org.junit.Test;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class EventPublisherCenterTest {
@@ -98,6 +99,19 @@ public class EventPublisherCenterTest {
     }
 
     @Test
-    public void testTestAddListener2() {
+    public void testTestAddListener2() throws InterruptedException {
+        EventPublisherCenter center = new EventPublisherCenter();
+        AsyncListener listener = new AsyncListener();
+        List<Method> collect = Arrays.stream(listener.getClass().getDeclaredMethods())
+            .filter(m -> m.getAnnotation(EventListener.class) != null)
+            .collect(Collectors.toList());
+
+        collect.forEach(method -> {
+            EventListener eventListener = method.getAnnotation(EventListener.class);
+            center.addListener("测试", eventListener, listener, method);
+        });
+        AddEvent addEvent = new AddEvent(this, "异步执行新增测试");
+        center.publish("测试", addEvent);
+        TimeUnit.SECONDS.sleep(6);
     }
 }
