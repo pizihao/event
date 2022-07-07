@@ -1,0 +1,34 @@
+package java.com.deep.sparrow.context;
+
+import java.com.deep.sparrow.event.AddEvent;
+import java.com.deep.sparrow.event.RemoveEvent;
+import java.com.deep.sparrow.listener.CollListener;
+import java.com.deep.sparrow.listener.CompletionStageListener;
+import java.com.deep.sparrow.listener.NullListener;
+import java.com.deep.sparrow.listener.RemoveListener;
+import org.junit.Test;
+
+public class DefaultEventContextProxyTest {
+
+    @Test
+    public void testDoInvoke() {
+        EventContext eventContext = new DefaultEventContext("测试");
+        CollListener collListener = new CollListener();
+        RemoveListener removeListener = new RemoveListener();
+        eventContext.addListener(AddEvent.class, collListener);
+        eventContext.addListener(RemoveEvent.class, removeListener);
+
+        eventContext.publish(new AddEvent(this, "集合顺延测试"));
+    }
+
+    @Test
+    public void testCompletionStage() {
+        EventContext eventContext = new DefaultEventContext("测试");
+        CompletionStageListener completionStageListener = new CompletionStageListener();
+        NullListener nullListener = new NullListener();
+        eventContext.addListener(AddEvent.class, completionStageListener);
+        eventContext.addListener(RemoveEvent.class, nullListener);
+        eventContext.publish(new AddEvent(this, "CompletionStage接口顺延测试"));
+    }
+
+}
