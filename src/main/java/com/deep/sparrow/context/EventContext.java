@@ -5,6 +5,8 @@ import com.deep.sparrow.publisher.EventPublisher;
 
 import java.lang.reflect.Type;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * 事件上下文
@@ -17,8 +19,17 @@ public interface EventContext extends EventPublisher {
 
     /**
      * 提取上下文的唯一标识
+     *
+     * @return name
      */
     String name();
+
+    /**
+     * 获取当前上下文的默认异常处理机制
+     *
+     * @return 异常处理
+     */
+    Consumer<Throwable> exceptionally();
 
     /**
      * 为一个事件添加监听器
@@ -44,11 +55,16 @@ public interface EventContext extends EventPublisher {
     /**
      * 获取所有的监听器，
      * 得到的监听器仅用于操作，其无法获知监听的具体事件
+     *
+     * @return 监听器集合
      */
     List<Listener> getListeners();
 
     /**
      * 获取一个事件所有的监听器
+     *
+     * @param type 事件类型
+     * @return 监听器集合
      */
     List<Listener> getListeners(Type type);
 

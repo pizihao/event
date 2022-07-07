@@ -6,6 +6,7 @@ import com.deep.sparrow.event.RemoveEvent;
 import com.deep.sparrow.listener.AddListener;
 import com.deep.sparrow.listener.Listener;
 import com.deep.sparrow.listener.RemoveListener;
+import com.deep.sparrow.listener.ThrowableListener;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -76,5 +77,15 @@ public class DefaultEventContextTest {
         AddFakeEvent addFakeEvent = new AddFakeEvent("不是事件类型的情况");
         eventContext.publish(addEvent);
         eventContext.publish(addFakeEvent);
+    }
+
+    @Test
+    public void testThrowable() {
+        EventContext eventContext = new DefaultEventContext("测试", System.out::println);
+        ThrowableListener throwableListener = new ThrowableListener();
+        eventContext.addListener(AddEvent.class, throwableListener);
+        AddEvent addEvent = new AddEvent(this,"异常测试");
+        eventContext.publish(addEvent);
+
     }
 }

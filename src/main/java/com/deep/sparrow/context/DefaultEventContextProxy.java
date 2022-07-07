@@ -9,6 +9,7 @@ import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.*;
+import java.util.function.Consumer;
 
 /**
  * 带有事件顺延的静态代理，如果某个监听器的返回值仍然是已经监控的事件类型，那么事件将会继续转发。
@@ -22,12 +23,27 @@ public class DefaultEventContextProxy extends DefaultEventContext {
 
     Event event;
 
-    public DefaultEventContextProxy(String name, List<Listener> listeners, Event event, EventBindMap eventBindMap) {
+    public DefaultEventContextProxy(String name,
+                                    List<Listener> listeners,
+                                    Event event,
+                                    EventBindMap eventBindMap) {
         super(name);
         this.eventBindMap.map = eventBindMap.map;
         this.listeners = listeners;
         this.event = event;
     }
+
+    public DefaultEventContextProxy(String name,
+                                    List<Listener> listeners,
+                                    Event event,
+                                    EventBindMap eventBindMap,
+                                    Consumer<Throwable> throwableConsumer) {
+        super(name, throwableConsumer);
+        this.eventBindMap.map = eventBindMap.map;
+        this.listeners = listeners;
+        this.event = event;
+    }
+
 
     /**
      * 实现事件的顺延，即重新发布一个事件
@@ -48,9 +64,8 @@ public class DefaultEventContextProxy extends DefaultEventContext {
     public void doExec(Listener listener) {
         try {
             publishEvents(listener.execEvent(event));
-        } catch (ExecutionException | InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new EventException(e);
+        } catch (Exception e) {
+            exceptionally().accept(e);
         }
     }
 
@@ -63,7 +78,7 @@ public class DefaultEventContextProxy extends DefaultEventContext {
      * @date 2022/7/1 16:34
      */
     private void publishEvents(Object o) throws ExecutionException, InterruptedException {
-        if (o == null){
+        if (o == null) {
             return;
         }
         if (o instanceof CompletionStage) {

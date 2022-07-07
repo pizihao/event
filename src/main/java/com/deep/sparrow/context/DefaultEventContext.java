@@ -1,5 +1,6 @@
 package com.deep.sparrow.context;
 
+import com.deep.exception.EventException;
 import com.deep.sparrow.event.Event;
 import com.deep.sparrow.event.FakeEvent;
 import com.deep.sparrow.listener.AsyncListenerDecorate;
@@ -9,6 +10,7 @@ import com.deep.sparrow.listener.OrderListenerDecorate;
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -23,6 +25,8 @@ public class DefaultEventContext implements EventContext {
      */
     String name;
 
+    Consumer<Throwable> throwableConsumer;
+
     /**
      * 存放所有的事件和监听器
      */
@@ -30,6 +34,11 @@ public class DefaultEventContext implements EventContext {
 
     public DefaultEventContext(String name) {
         this.name = name;
+    }
+
+    public DefaultEventContext(String name, Consumer<Throwable> throwableConsumer) {
+        this.name = name;
+        this.throwableConsumer = throwableConsumer;
     }
 
     /**
@@ -66,13 +75,28 @@ public class DefaultEventContext implements EventContext {
      * @param event     事件对象
      */
     void newProxy(List<Listener> listeners, Event event) {
-        DefaultEventContextProxy contextProxy = new DefaultEventContextProxy(name, listeners, event, eventBindMap);
+        DefaultEventContextProxy contextProxy = new DefaultEventContextProxy(
+            name,
+            listeners,
+            event,
+            eventBindMap,
+            throwableConsumer);
         contextProxy.doInvoke();
     }
 
     @Override
     public String name() {
         return name;
+    }
+
+    @Override
+    public Consumer<Throwable> exceptionally() {
+        if (Objects.isNull(throwableConsumer)) {
+            return t -> {
+                throw new EventException(t.getMessage());
+            };
+        }
+        return throwableConsumer;
     }
 
     @Override
