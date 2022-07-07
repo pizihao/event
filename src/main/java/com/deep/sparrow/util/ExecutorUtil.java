@@ -1,6 +1,7 @@
 package com.deep.sparrow.util;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -34,10 +35,10 @@ public class ExecutorUtil {
             // 判断当前正在活跃线程和最大线程的比例
             BigDecimal newActive = BigDecimal.valueOf(p.getActiveCount());
             BigDecimal newMax = BigDecimal.valueOf(p.getMaximumPoolSize());
-            BigDecimal newProportion = newActive.divide(newMax, 2);
+            BigDecimal newProportion = newActive.divide(newMax, RoundingMode.CEILING);
             BigDecimal oldActive = BigDecimal.valueOf(poolExecutor.getActiveCount());
             BigDecimal oldMax = BigDecimal.valueOf(poolExecutor.getMaximumPoolSize());
-            BigDecimal oldProportion = oldActive.divide(oldMax, 2);
+            BigDecimal oldProportion = oldActive.divide(oldMax, RoundingMode.CEILING);
 
             if (newProportion.compareTo(oldProportion) < 1) {
                 poolExecutor = p;

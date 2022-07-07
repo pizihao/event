@@ -4,6 +4,7 @@ import com.deep.exception.EventException;
 import com.deep.sparrow.context.DefaultEventContext;
 import com.deep.sparrow.context.EventContext;
 import com.deep.sparrow.event.Event;
+import com.deep.sparrow.listener.AsyncListenerDecorate;
 import com.deep.sparrow.listener.EventListener;
 import com.deep.sparrow.listener.Listener;
 import com.deep.sparrow.listener.OrderListenerDecorate;
@@ -55,7 +56,8 @@ class EventPublisherCenter {
 
     /**
      * 为一个上下文添加监听器
-     * 如果上下文不存在则添加
+     * 如果上下文不存在则添加<br>
+     * 如果t的类型为{@link AsyncListenerDecorate}则会异步执行
      *
      * @param name     上下文名称
      * @param t        监听器对象
@@ -85,12 +87,31 @@ class EventPublisherCenter {
      */
     public void addListener(String name, EventListener listener, Object o, Method method) {
         Listener l = newListenerProxy(o, method);
-        OrderListenerDecorate listenerDecorate = new OrderListenerDecorate(listener.order(), l);
+        Listener listenerDecorate = new OrderListenerDecorate(listener.order(), l);
+        if (listener.isAsync()) {
+            listenerDecorate = new AsyncListenerDecorate((OrderListenerDecorate) listenerDecorate);
+        }
         addListener(name, listenerDecorate, listener.value());
     }
 
     /**
-     * 为一个上下文添加监听器
+     * 为一个上下文添加监听器，添加后的监听器异步执行
+     * 如果上下文不存在则添加
+     *
+     * @param name     上下文名称
+     * @param t        监听器对象
+     * @param eventCls 被监听的事件类型
+     * @param <T>      实现了{@link Listener}的监听器
+     */
+    public <T extends Listener> void addAsyncListener(String name, T t, Class<? extends Event> eventCls) {
+        if (Objects.isNull(t)) {
+            return;
+        }
+        addListener(name, assemble(t), eventCls);
+    }
+
+    /**
+     * 为所有上下文添加监听器
      *
      * @param listener 声明注解
      * @param o        监听器对象
@@ -139,6 +160,21 @@ class EventPublisherCenter {
             return;
         }
         map.values().forEach(c -> c.addListener(eventCls, t));
+    }
+
+    /**
+     * 为所有上下文添加监听器，添加后的监听器异步执行
+     * 如果上下文不存在则添加
+     *
+     * @param t        监听器对象
+     * @param eventCls 被监听的事件类型
+     * @param <T>      实现了{@link Listener}的监听器
+     */
+    public <T extends Listener> void addAsyncListener(T t, Class<? extends Event> eventCls) {
+        if (Objects.isNull(t)) {
+            return;
+        }
+        addListener(assemble(t), eventCls);
     }
 
     /**
@@ -203,6 +239,15 @@ class EventPublisherCenter {
         eventContext.publish(event);
     }
 
+    protected Listener assemble(Listener t) {
+        if (t instanceof AsyncListenerDecorate) {
+            return t;
+        } else if (t instanceof OrderListenerDecorate) {
+            return new AsyncListenerDecorate((OrderListenerDecorate) t);
+        } else {
+            return new AsyncListenerDecorate(new OrderListenerDecorate(t));
+        }
+    }
 
     static List<String> refuseGroup = new ArrayList<>();
 

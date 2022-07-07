@@ -1,15 +1,14 @@
 package com.deep.sparrow.context;
 
-import com.deep.exception.EventException;
 import com.deep.sparrow.event.Event;
 import com.deep.sparrow.event.FakeEvent;
+import com.deep.sparrow.listener.AsyncListenerDecorate;
 import com.deep.sparrow.listener.Listener;
 import com.deep.sparrow.listener.OrderListenerDecorate;
 
 import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 /**
@@ -68,12 +67,7 @@ public class DefaultEventContext implements EventContext {
      */
     void newProxy(List<Listener> listeners, Event event) {
         DefaultEventContextProxy contextProxy = new DefaultEventContextProxy(name, listeners, event, eventBindMap);
-        try {
-            contextProxy.doInvoke();
-        } catch (ExecutionException | InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new EventException(e);
-        }
+        contextProxy.doInvoke();
     }
 
     @Override
@@ -111,10 +105,6 @@ public class DefaultEventContext implements EventContext {
             if (listeners == null) {
                 listeners = new HashSet<>();
             }
-            // 对监听器进行包装
-            if (!(listener instanceof OrderListenerDecorate)) {
-                listener = new OrderListenerDecorate(listener);
-            }
             listeners.add(listener);
             eventBindMap.map.put(type, listeners);
         }
@@ -131,7 +121,7 @@ public class DefaultEventContext implements EventContext {
         synchronized (eventBindMap) {
             Set<Listener> listeners = eventBindMap.map.get(type);
             if (Objects.nonNull(listeners)) {
-                listeners.remove(getListenerDecorate(listener));
+                listeners.remove(getOrderListenerDecorate(listener));
             }
         }
     }
@@ -176,12 +166,10 @@ public class DefaultEventContext implements EventContext {
         Map<Type, Set<Listener>> map = new ConcurrentHashMap<>();
 
         public final List<Listener> getListeners() {
-            return map.values().stream()
+            List<Listener> listeners = map.values().stream()
                 .flatMap(Collection::stream)
-                .map(DefaultEventContext::getListenerDecorate)
-                .sorted()
-                .map(OrderListenerDecorate::getListener)
                 .collect(Collectors.toList());
+            return sort(listeners);
         }
 
         public final List<Listener> getListeners(Type type) {
@@ -192,13 +180,18 @@ public class DefaultEventContext implements EventContext {
             if (Objects.isNull(listeners)) {
                 return Collections.emptyList();
             }
-            return listeners.stream()
-                .map(DefaultEventContext::getListenerDecorate)
-                .sorted()
-                .map(OrderListenerDecorate::getListener)
-                .collect(Collectors.toList());
+            return sort(listeners);
         }
 
+        private List<Listener> sort(Collection<Listener> listeners) {
+            return listeners.stream()
+                .sorted((f, l) -> {
+                    OrderListenerDecorate fListener = getOrderListenerDecorate(f);
+                    OrderListenerDecorate lListener = getOrderListenerDecorate(l);
+                    return fListener.compareTo(lListener);
+                }).map(a -> getOrderListenerDecorate(a).getListener())
+                .collect(Collectors.toList());
+        }
 
     }
 
@@ -209,7 +202,10 @@ public class DefaultEventContext implements EventContext {
      * @param listener listener
      * @return OrderListenerDecorate
      */
-    protected static OrderListenerDecorate getListenerDecorate(Listener listener) {
+    protected static OrderListenerDecorate getOrderListenerDecorate(Listener listener) {
+        if (listener instanceof AsyncListenerDecorate) {
+            return ((AsyncListenerDecorate) listener).getListener();
+        }
         return listener instanceof OrderListenerDecorate
             ? (OrderListenerDecorate) listener
             : new OrderListenerDecorate(listener);

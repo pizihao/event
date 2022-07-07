@@ -1,6 +1,8 @@
 package com.deep.sparrow.context;
 
+import com.deep.exception.EventException;
 import com.deep.sparrow.event.Event;
+import com.deep.sparrow.listener.AsyncListenerDecorate;
 import com.deep.sparrow.listener.Listener;
 
 import java.lang.reflect.Array;
@@ -9,6 +11,7 @@ import java.util.List;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * 带有事件顺延的静态代理，如果某个监听器的返回值仍然是已经监控的事件类型，那么事件将会继续转发。
@@ -35,11 +38,24 @@ public class DefaultEventContextProxy extends DefaultEventContext {
      * @author liuwenhao
      * @date 2022/7/1 16:33
      */
-    void doInvoke() throws ExecutionException, InterruptedException {
+    void doInvoke() {
         for (Listener listener : listeners) {
-            publishEvents(listener.execEvent(event));
+            if (listener instanceof AsyncListenerDecorate) {
+                AsyncListenerDecorate asyncListenerDecorate = (AsyncListenerDecorate) listener;
+                ThreadPoolExecutor executor = asyncListenerDecorate.getExecutor();
+                executor.execute(() -> doExec(listener));
+            } else {
+                doExec(listener);
+            }
         }
+    }
 
+    public void doExec(Listener listener) {
+        try {
+            publishEvents(listener.execEvent(event));
+        } catch (ExecutionException | InterruptedException e) {
+            throw new EventException(e);
+        }
     }
 
     /**
