@@ -8,10 +8,7 @@ import com.deep.sparrow.listener.Listener;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.*;
 
 /**
  * 带有事件顺延的静态代理，如果某个监听器的返回值仍然是已经监控的事件类型，那么事件将会继续转发。
@@ -41,10 +38,7 @@ public class DefaultEventContextProxy extends DefaultEventContext {
     void doInvoke() {
         for (Listener listener : listeners) {
             if (listener instanceof AsyncListenerDecorate) {
-                AsyncListenerDecorate asyncListenerDecorate = (AsyncListenerDecorate) listener;
-                ThreadPoolExecutor executor = asyncListenerDecorate.getExecutor();
-                executor.execute(() -> doExec(listener));
-                executor.shutdown();
+                CompletableFuture.runAsync(() -> doExec(listener));
             } else {
                 doExec(listener);
             }
