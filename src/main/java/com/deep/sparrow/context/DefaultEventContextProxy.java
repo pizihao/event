@@ -1,6 +1,5 @@
 package com.deep.sparrow.context;
 
-import com.deep.exception.EventException;
 import com.deep.sparrow.event.Event;
 import com.deep.sparrow.listener.AsyncListenerDecorate;
 import com.deep.sparrow.listener.Listener;
@@ -64,8 +63,9 @@ public class DefaultEventContextProxy extends DefaultEventContext {
     public void doExec(Listener listener) {
         try {
             publishEvents(listener.execEvent(event));
-        } catch (Exception e) {
+        } catch (ExecutionException | InterruptedException e) {
             exceptionally().accept(e);
+            Thread.currentThread().interrupt();
         }
     }
 
