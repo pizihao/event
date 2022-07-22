@@ -82,11 +82,7 @@ public class DefaultEventContextProxy extends DefaultEventContext {
             return;
         }
         if (o instanceof CompletionStage) {
-            ((CompletionStage<?>) o).thenAccept(e -> {
-                if (e != null) {
-                    publish(e);
-                }
-            });
+            publish(((CompletionStage<?>) o).toCompletableFuture().join());
         } else if (o instanceof Future) {
             publish(((Future<?>) o).get());
         } else {
