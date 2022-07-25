@@ -1,4 +1,4 @@
-package com.deep.event.event;
+package com.deep.event;
 
 import java.util.EventListener;
 

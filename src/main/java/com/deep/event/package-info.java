@@ -4,4 +4,4 @@
  *
  * @author liuwenhao
  */
-package com.deep.event.event;
+package com.deep.event;

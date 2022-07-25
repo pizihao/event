@@ -1,4 +1,4 @@
-package com.deep.event.event;
+package com.deep.event;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;

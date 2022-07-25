@@ -1,4 +1,4 @@
-package com.deep.event.event;
+package com.deep.event;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;

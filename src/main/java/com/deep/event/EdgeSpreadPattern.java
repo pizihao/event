@@ -1,4 +1,4 @@
-package com.deep.event.event;
+package com.deep.event;
 
 /**
  * 边缘传播<br>
