@@ -1,5 +1,10 @@
 package com.deep.event;
 
+import cn.hutool.core.lang.ParameterizedTypeImpl;
+import cn.hutool.core.util.ArrayUtil;
+import cn.hutool.core.util.ReflectUtil;
+import com.sun.istack.internal.Nullable;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
@@ -10,6 +15,7 @@ import java.util.*;
  *
  * @author Create by liuwenhao on 2022/7/1 16:57
  */
+@SuppressWarnings("unused")
 public class EventPublisherCenter {
 
 	/**
@@ -17,10 +23,7 @@ public class EventPublisherCenter {
 	 */
 	Map<String, EventContext> contextMap = new HashMap<>();
 
-	/**
-	 * 默认的上下文名称
-	 */
-	static final String DEFAULT_NAME = "DEFAULT_EVENT_CONTEXT";
+	static final String LISTENER_METHOD_NAME = "execEvent";
 
 	/**
 	 * 构造
@@ -29,11 +32,9 @@ public class EventPublisherCenter {
 	 */
 	public EventPublisherCenter(Map<String, EventContext> contextMap) {
 		this.contextMap = contextMap;
-		this.contextMap.computeIfAbsent(DEFAULT_NAME, DefaultContext::new);
 	}
 
 	public EventPublisherCenter() {
-		contextMap.put(DEFAULT_NAME, new DefaultContext(DEFAULT_NAME));
 	}
 
 	// ========================= 有关上下文的操作 =========================
@@ -79,18 +80,26 @@ public class EventPublisherCenter {
 	}
 
 	/**
+	 * 通过标识清空一个上下文并返回被清空的上下文，如果上下文原本就不在映射表中则返回null<br>
+	 *
+	 * @param name 上下文标识
+	 * @return 被删除的上下文
+	 */
+	public EventContext clearContext(String name) {
+		EventContext context = contextMap.get(name);
+		if (Objects.nonNull(context)) {
+			context.clear();
+		}
+		return context;
+	}
+
+	/**
 	 * 通过标识删除一个上下文并返回被删除的上下文，如果上下文原本就不在映射表中则返回null<br>
-	 * 如果删除的是默认上下文，则会清空默认上下文并返回清空后的默认上下文
 	 *
 	 * @param name 上下文标识
 	 * @return 被删除的上下文
 	 */
 	public EventContext removeContext(String name) {
-		if (DEFAULT_NAME.equals(name)) {
-			EventContext context = contextMap.get(DEFAULT_NAME);
-			context.clear();
-			return context;
-		}
 		return contextMap.remove(name);
 	}
 
@@ -111,6 +120,8 @@ public class EventPublisherCenter {
 	}
 
 	/**
+	 * 创建一个监听模块，使用它可以快速构造一个自定义的监听器
+	 *
 	 * @param listener 监听器
 	 * @param <E>      事件类型
 	 * @param <R>      监听器返回值
@@ -146,39 +157,76 @@ public class EventPublisherCenter {
 	 * @param <E>      事件类型
 	 * @param <R>      监听器返回值
 	 */
-	public <E, R> void bind(String name, Type type, Listener<E, R> listener) {
+	public <E, R> void bind(String name, Type type, Listener<E, R> listener, @Nullable EventProcessor<E, R> eventProcessor) {
 		Objects.requireNonNull(name);
 		Objects.requireNonNull(listener);
 
 		EventContext context = createContext(name);
 		ListenerDecorate<E, R> listenerDecorate = ListenerDecorate
 			.<E, R>build()
+			.eventProcessor(eventProcessor)
 			.listener(listener);
 		context.bind(type, listenerDecorate);
 	}
 
 	/**
-	 * 在默认上下文将事件和监听器进行绑定
+	 * 将一个实例o中的方法转换成监听器并进行绑定<br>
+	 * 该方法必须被{@link EventListener}注解标注
 	 *
-	 * @param type          事件类型
-	 * @param listenerModel 监听器包装信息，提供完整的监听器配置
-	 * @param <E>           事件类型
-	 * @param <R>           监听器返回值
+	 * @param name   上下文标识
+	 * @param method 用作监听器的方法
+	 * @param o      获取对象中可以带有{@link EventListener}注解的方法，并解析和绑定
+	 * @param <E>    监听器
+	 * @param <R>    事件类型
+	 * @throws NullPointerException 找不到注解时
 	 */
-	public <E, R> void bind(Type type, ListenerModel<E, R> listenerModel) {
-		bind(DEFAULT_NAME, type, listenerModel);
+	public <E, R> void bind(String name, Method method, Object o) {
+		Objects.requireNonNull(method);
+		Objects.requireNonNull(name);
+		Objects.requireNonNull(o);
+		Listener<E, R> listenerProxy = newListenerProxy(o, method);
+		EventListener eventListener = method.getAnnotation(EventListener.class);
+		// 事件类型
+		Class<?> value = eventListener.value();
+		Class<?>[] arguments = eventListener.arguments();
+		Type type = value;
+		if (ArrayUtil.isEmpty(arguments)) {
+			type = new ParameterizedTypeImpl(arguments, value, null);
+		}
+		ListenerModel<E, R> listenerModel = createListener(listenerProxy)
+			.order(eventListener.order())
+			.async(eventListener.isAsync())
+			.spreadPattern(ReflectUtil.newInstance(eventListener.spread().getName()));
+		// 异常方法
+		String throwHandlerName = eventListener.throwHandler();
+		Method throwMethod = ReflectUtil.getMethodByName(o.getClass(), throwHandlerName);
+		if (throwMethod != null) {
+			listenerModel.fn(throwable -> ReflectUtil.invoke(o, throwMethod, throwable));
+		}
+		// 绑定
+		bind(name, type, listenerModel);
 	}
 
 	/**
-	 * 在默认上下文将事件和监听器进行绑定
+	 * 将一个实例o中所有带有{@link  EventListener}注释的方法转换成监听器并进行绑定
 	 *
-	 * @param type     事件类型
-	 * @param listener 监听器
-	 * @param <E>      事件类型
-	 * @param <R>      监听器返回值
+	 * @param name 上下文标识
+	 * @param o    获取对象中可以带有{@link EventListener}注解的方法，并解析和绑定
 	 */
-	public <E, R> void bind(Type type, Listener<E, R> listener) {
-		bind(DEFAULT_NAME, type, listener);
+	public void bind(String name, Object o) {
+		Objects.requireNonNull(name);
+		Objects.requireNonNull(o);
+		// 获取方法
+		Method[] methods = ReflectUtil.getMethods(
+			o.getClass(),
+			m -> m.getAnnotation(EventListener.class) != null
+		);
+		if (methods == null || methods.length == 0) {
+			return;
+		}
+		for (Method method : methods) {
+			bind(name, method, o);
+		}
 	}
 
 	/**
@@ -218,30 +266,6 @@ public class EventPublisherCenter {
 	}
 
 	/**
-	 * 在默认上下文中解绑事件和监听器
-	 *
-	 * @param type          事件类型
-	 * @param listenerModel 监听器包装信息，提供完整的监听器配置
-	 * @param <E>           事件类型
-	 * @param <R>           监听器返回值
-	 */
-	public <E, R> void unbind(Type type, ListenerModel<E, R> listenerModel) {
-		unbind(DEFAULT_NAME, type, listenerModel);
-	}
-
-	/**
-	 * 在默认上下文中解绑事件和监听器
-	 *
-	 * @param type     事件类型
-	 * @param listener 监听器
-	 * @param <E>      事件类型
-	 * @param <R>      监听器返回值
-	 */
-	public <E, R> void unbind(Type type, Listener<E, R> listener) {
-		unbind(DEFAULT_NAME, type, listener);
-	}
-
-	/**
 	 * 解绑一个上下文中某个事件和所有监听器的关联
 	 *
 	 * @param name 上下文名称
@@ -252,17 +276,6 @@ public class EventPublisherCenter {
 		EventContext context = createContext(name);
 		context.unbindAll(type);
 	}
-
-	/**
-	 * 解绑默认上下文中某个事件和所有监听器的关联
-	 *
-	 * @param type 事件类型
-	 */
-	public void unbindAll(Type type) {
-		EventContext context = createContext(DEFAULT_NAME);
-		context.unbindAll(type);
-	}
-
 
 	// ========================= 发布操作 =========================
 
@@ -295,41 +308,21 @@ public class EventPublisherCenter {
 	}
 
 	/**
-	 * 在默认上下文中发布事件，如果上下文不存在则无效
-	 *
-	 * @param event 事件实例
-	 */
-	public void publish(Object event) {
-		publish(DEFAULT_NAME, event);
-	}
-
-	/**
-	 * 在默认上下文中发布事件，如果上下文不存在则无效<br>
-	 * 如果event是复杂的参数化类型对象，则可以使用type标注其具体类型
-	 *
-	 * @param event 事件实例
-	 * @param type  事件类型
-	 */
-	public void publish(Object event, Type type) {
-		publish(DEFAULT_NAME, event, type);
-	}
-
-
-	/**
 	 * 生成一个Listener代理类
 	 *
 	 * @param o      代理的对象
 	 * @param method 需要被代理的方法
 	 * @return 监听器代理类
 	 */
-	private Listener newListenerProxy(Object o, Method method) {
+	@SuppressWarnings("unchecked")
+	private <E, R> Listener<E, R> newListenerProxy(Object o, Method method) {
 		Class<?>[] classes = {Listener.class};
 		ClassLoader classLoader = this.getClass().getClassLoader();
-		return (Listener) Proxy.newProxyInstance(
+		return (Listener<E, R>) Proxy.newProxyInstance(
 			classLoader,
 			classes,
 			(p, m, a) -> {
-				if ("execEvent".equals(m.getName())) {
+				if (LISTENER_METHOD_NAME.equals(m.getName())) {
 					return method.invoke(o, a);
 				}
 				if (refuseGroup.contains(m.getName())) {

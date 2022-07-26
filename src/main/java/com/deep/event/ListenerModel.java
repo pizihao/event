@@ -26,6 +26,11 @@ public class ListenerModel<E, R> {
 	SpreadPattern spreadPattern;
 
 	/**
+	 * 监听器执行的前置操作和后置操作
+	 */
+	EventProcessor<E, R> eventProcessor;
+
+	/**
 	 * 异常处理
 	 */
 	Function<Throwable, R> fn;
@@ -68,6 +73,11 @@ public class ListenerModel<E, R> {
 		return this;
 	}
 
+	public ListenerModel<E, R> eventProcessor(EventProcessor<E, R> eventProcessor) {
+		this.eventProcessor = eventProcessor;
+		return this;
+	}
+
 	public int getOrder() {
 		return order;
 	}
@@ -88,6 +98,14 @@ public class ListenerModel<E, R> {
 		return listener;
 	}
 
+	public EventProcessor<E, R> getEventProcessor() {
+		return eventProcessor;
+	}
+
+	public void setEventProcessor(EventProcessor<E, R> eventProcessor) {
+		this.eventProcessor = eventProcessor;
+	}
+
 	/**
 	 * 装换，将ListenerModel转换为ListenerDecorate，并设置默认值
 	 *
@@ -100,12 +118,14 @@ public class ListenerModel<E, R> {
 		boolean decorateAsync = isAsync() == null ? listenerDecorate.async : isAsync();
 		Function<Throwable, R> decorateFn = getFn() == null ? listenerDecorate.getThrowHandler() : getFn();
 		SpreadPattern decorateSpreadPattern = getSpreadPattern() == null ? listenerDecorate.getSpreadPattern() : getSpreadPattern();
+		EventProcessor<E, R> decorateProcessor = getEventProcessor() == null ? listenerDecorate.getEventProcessor() : getEventProcessor();
 
 		return listenerDecorate
 			.listener(getListener())
 			.fn(decorateFn)
 			.async(decorateAsync)
 			.order(decorateOrder)
+			.eventProcessor(decorateProcessor)
 			.spreadPattern(decorateSpreadPattern);
 	}
 }

@@ -25,7 +25,7 @@ public interface SpreadPattern {
 	 * @param e       事件实体
 	 * @param <R>     返回值类型，此处为了提高辨识度使用泛型，本质和Object没有区别
 	 * @param <E>     事件类型
-	 * @throws Throwable
+	 * @throws Throwable 过程中产生的异常
 	 */
 	<E, R> void spread(EventContext context, R r, E e) throws Throwable;
 
@@ -43,7 +43,7 @@ public interface SpreadPattern {
 	 *
 	 * @param context 上下文
 	 * @param o       事件
-	 * @throws Throwable
+	 * @throws Throwable 过程中产生的异常
 	 */
 	default void publishEvents(EventContext context, Object o) throws Throwable {
 		if (o == null) {

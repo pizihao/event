@@ -177,6 +177,7 @@ public class DefaultContext implements EventContext {
 	 * @param <R>      返回值类型
 	 */
 	private <E, R> void execute(Listener<E, R> listener, Object o) {
+
 		ListenerDecorate<E, R> listenerDecorate = (ListenerDecorate<E, R>) listener;
 		if (listenerDecorate.isAsync()) {
 			ThreadUtil.execAsync(() -> doExecute(listenerDecorate, o));
@@ -190,16 +191,19 @@ public class DefaultContext implements EventContext {
 		if (o == null) {
 			return;
 		}
+		E event = (E) o;
 		try {
+			listener.getEventProcessor().before(event, listener);
 			SpreadPattern spreadPattern = listener.getSpreadPattern();
-			E e = (E) o;
-			R r = listener.execEvent(e);
+			R r = listener.execEvent(event);
 			if (r == null) {
 				return;
 			}
-			spreadPattern.spread(this, r, e);
+			spreadPattern.spread(this, r, event);
 		} catch (Throwable e) {
 			listener.getThrowHandler().apply(e);
+		} finally {
+			listener.getEventProcessor().after(event, listener);
 		}
 
 	}

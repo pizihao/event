@@ -35,6 +35,11 @@ class ListenerDecorate<E, R> implements Listener<E, R>, Comparable<ListenerDecor
 	SpreadPattern spreadPattern;
 
 	/**
+	 * 监听器执行的前置操作和后置操作
+	 */
+	EventProcessor<E, R> eventProcessor = new NoEventProcessor<>();
+
+	/**
 	 * 监听器
 	 */
 	Listener<E, R> listener;
@@ -75,6 +80,13 @@ class ListenerDecorate<E, R> implements Listener<E, R>, Comparable<ListenerDecor
 		return this;
 	}
 
+	ListenerDecorate<E, R> eventProcessor(EventProcessor<E, R> eventProcessor) {
+		if (eventProcessor != null){
+			this.eventProcessor = eventProcessor;
+		}
+		return this;
+	}
+
 	public ListenerDecorate<E, R> fn(Function<Throwable, R> fn) {
 		this.fn = fn;
 		return this;
@@ -86,6 +98,10 @@ class ListenerDecorate<E, R> implements Listener<E, R>, Comparable<ListenerDecor
 
 	public SpreadPattern getSpreadPattern() {
 		return spreadPattern;
+	}
+
+	EventProcessor<E, R> getEventProcessor() {
+		return eventProcessor;
 	}
 
 	public Function<Throwable, R> getThrowHandler() {

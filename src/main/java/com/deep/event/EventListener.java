@@ -39,25 +39,11 @@ public @interface EventListener {
 	boolean isAsync() default false;
 
 	/**
-	 * 是否开启事务<br>
-	 * 当设置为true时：<br>
-	 * 在同步执行的情况下：
-	 * <ol>
-	 *     <li>如果存在事务则加入</li>
-	 *     <li>如果不存在事务则自己开启事务</li>
-	 *     <li>如果开启事务失败则按照无事务模式执行</li>
-	 * </ol>
-	 * 在异步执行的情况下：
-	 * <ol>
-	 *     <li>如果可开启事务则自己开始事务执行</li>
-	 *     <li>如果不可开启事务则按照无事务模式执行</li>
-	 * </ol>
-	 * 当设置为false时：<br>
-	 * 按照正常的模式执行，忽略事务对监听器带来的任何影响
+	 * 执行传播模式，默认{@link EdgeSpreadPattern}
 	 *
-	 * @return 是否开启事务检查
+	 * @return 传播模式类型
 	 */
-	boolean openTransaction() default false;
+	Class<?> spread() default EdgeSpreadPattern.class;
 
 	/**
 	 * 监听器优先度。order越大，优先度越低，默认最低优先级
