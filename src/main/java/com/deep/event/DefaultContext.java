@@ -158,6 +158,7 @@ public class DefaultContext implements EventContext {
 		Collection<Listener<E, Object>> listener = listenerPattern.getListener(type, listeners);
 		// 后续的操作中需要用到 ListenerDecorate 的部分，监听模式不应忽略这些重要的属性
 		return listenerSet.stream().filter(o -> {
+				o.clearThrow();
 				Listener<Object, Object> oListener = o.getListener();
 				for (Listener<E, Object> l : listener) {
 					// 受到代理的影响如果直接使用equals判断可能会有影响
@@ -211,6 +212,7 @@ public class DefaultContext implements EventContext {
 			}
 			spreadPattern.spread(this, r, event);
 		} catch (Throwable e) {
+			listener.throwResult(e);
 			listener.getThrowHandler().apply(e);
 		} finally {
 			listener.getEventProcessor().after(event, listener);

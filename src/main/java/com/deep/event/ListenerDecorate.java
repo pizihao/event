@@ -1,5 +1,7 @@
 package com.deep.event;
 
+import cn.hutool.core.exceptions.ExceptionUtil;
+
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -49,13 +51,18 @@ class ListenerDecorate<E, R> implements Listener<E, R>, Comparable<ListenerDecor
 	 * 异常的处理
 	 */
 	Function<Throwable, R> fn = t -> {
-		throw new RuntimeException(t);
+		throw ExceptionUtil.wrapRuntime(t);
 	};
 
 	/**
-	 * 改监听器上次执行后的结果
+	 * 监听器上次执行后的结果
 	 */
 	R result;
+
+	/**
+	 * 异常信息，会在监听器出现异常后写入，下次获取到该监听器之前清除
+	 */
+	Throwable throwResult;
 
 	@Override
 	public R execEvent(E e) {
@@ -102,6 +109,14 @@ class ListenerDecorate<E, R> implements Listener<E, R>, Comparable<ListenerDecor
 		this.result = result;
 	}
 
+	public void throwResult(Throwable throwResult) {
+		this.throwResult = throwResult;
+	}
+
+	public void clearThrow() {
+		this.throwResult = null;
+	}
+
 	public boolean isAsync() {
 		return async;
 	}
@@ -124,6 +139,10 @@ class ListenerDecorate<E, R> implements Listener<E, R>, Comparable<ListenerDecor
 
 	public R getResult() {
 		return result;
+	}
+
+	public Throwable getThrowResult() {
+		return throwResult;
 	}
 
 	@Override

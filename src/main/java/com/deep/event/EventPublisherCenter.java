@@ -8,7 +8,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
-import java.util.EventListener;
 import java.util.*;
 
 /**
@@ -174,11 +173,11 @@ public class EventPublisherCenter {
 
 	/**
 	 * 将一个实例o中的方法转换成监听器并进行绑定<br>
-	 * 该方法必须被{@link java.util.EventListener}注解标注
+	 * 该方法必须被{@link EventListener}注解标注
 	 *
 	 * @param name   上下文标识
 	 * @param method 用作监听器的方法
-	 * @param o      获取对象中可以带有{@link java.util.EventListener}注解的方法，并解析和绑定
+	 * @param o      获取对象中可以带有{@link EventListener}注解的方法，并解析和绑定
 	 * @param <E>    监听器
 	 * @param <R>    事件类型
 	 * @throws NullPointerException 找不到注解时
@@ -192,7 +191,7 @@ public class EventPublisherCenter {
 			return;
 		}
 		Listener<E, R> listenerProxy = newListenerProxy(o, method);
-		java.util.EventListener eventListener = method.getAnnotation(java.util.EventListener.class);
+		EventListener eventListener = method.getAnnotation(EventListener.class);
 		// 事件类型
 		Class<?> value = eventListener.value();
 		Class<?>[] arguments = eventListener.arguments();
@@ -215,10 +214,10 @@ public class EventPublisherCenter {
 	}
 
 	/**
-	 * 将一个实例o中所有带有{@link  java.util.EventListener}注释的方法转换成监听器并进行绑定
+	 * 将一个实例o中所有带有{@link  EventListener}注释的方法转换成监听器并进行绑定
 	 *
 	 * @param name 上下文标识
-	 * @param o    获取对象中可以带有{@link java.util.EventListener}注解的方法，并解析和绑定
+	 * @param o    获取对象中可以带有{@link EventListener}注解的方法，并解析和绑定
 	 */
 	public void bind(String name, Object o) {
 		Objects.requireNonNull(name);
