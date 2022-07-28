@@ -11,6 +11,7 @@ import java.util.function.Function;
  *  	<li>监听模式</li>
  *  	<li>传播模式</li>
  *  	<li>异常处理</li>
+ *  	<li>前置操作和后置操作</li>
  *  	<li>...</li>
  * </ul>
  *
@@ -51,6 +52,11 @@ class ListenerDecorate<E, R> implements Listener<E, R>, Comparable<ListenerDecor
 		throw new RuntimeException(t);
 	};
 
+	/**
+	 * 改监听器上次执行后的结果
+	 */
+	R result;
+
 	@Override
 	public R execEvent(E e) {
 		return listener.execEvent(e);
@@ -81,7 +87,7 @@ class ListenerDecorate<E, R> implements Listener<E, R>, Comparable<ListenerDecor
 	}
 
 	ListenerDecorate<E, R> eventProcessor(EventProcessor<E, R> eventProcessor) {
-		if (eventProcessor != null){
+		if (eventProcessor != null) {
 			this.eventProcessor = eventProcessor;
 		}
 		return this;
@@ -90,6 +96,10 @@ class ListenerDecorate<E, R> implements Listener<E, R>, Comparable<ListenerDecor
 	public ListenerDecorate<E, R> fn(Function<Throwable, R> fn) {
 		this.fn = fn;
 		return this;
+	}
+
+	public void result(R result) {
+		this.result = result;
 	}
 
 	public boolean isAsync() {
@@ -112,12 +122,19 @@ class ListenerDecorate<E, R> implements Listener<E, R>, Comparable<ListenerDecor
 		return listener;
 	}
 
+	public R getResult() {
+		return result;
+	}
+
 	@Override
 	public int compareTo(ListenerDecorate o) {
-		if (o == null) {
+		if (o == null || this.order > o.order) {
 			return 1;
+		} else if (this.order < o.order) {
+			return -1;
+		} else {
+			return 0;
 		}
-		return this.order - o.order;
 	}
 
 	@Override

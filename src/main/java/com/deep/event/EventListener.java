@@ -46,11 +46,11 @@ public @interface EventListener {
 	Class<?> spread() default EdgeSpreadPattern.class;
 
 	/**
-	 * 监听器优先度。order越大，优先度越低，默认最低优先级
+	 * 监听器优先度。order越大，优先度越低，默认最高优先级
 	 *
 	 * @return 优先级
 	 */
-	int order() default Integer.MAX_VALUE;
+	int order() default Integer.MIN_VALUE;
 
 	/**
 	 * 异常处理，选取注解标注方法所在类中的对应方法名的方法作为异常处理方法，不考虑访问权限。<br>

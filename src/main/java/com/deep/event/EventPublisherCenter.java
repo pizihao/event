@@ -1,17 +1,18 @@
 package com.deep.event;
 
-import cn.hutool.core.lang.ParameterizedTypeImpl;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ReflectUtil;
-import com.sun.istack.internal.Nullable;
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
+import java.util.EventListener;
 import java.util.*;
 
 /**
- * 默认的事件发布中心
+ * 事件发布中心
  *
  * @author Create by liuwenhao on 2022/7/1 16:57
  */
@@ -127,8 +128,8 @@ public class EventPublisherCenter {
 	 * @param <R>      监听器返回值
 	 * @return ListenerModel
 	 */
-	public <E, R> ListenerModel<E, R> createListener(Listener<E, R> listener) {
-		return ListenerModel.build(listener);
+	public <E, R> ListenerBuilder<E, R> createListener(Listener<E, R> listener) {
+		return ListenerBuilder.build(listener);
 	}
 
 	/**
@@ -140,7 +141,7 @@ public class EventPublisherCenter {
 	 * @param <E>           事件类型
 	 * @param <R>           监听器返回值
 	 */
-	public <E, R> void bind(String name, Type type, ListenerModel<E, R> listenerModel) {
+	public <E, R> void bind(String name, Type type, ListenerBuilder<E, R> listenerModel) {
 		Objects.requireNonNull(name);
 		Objects.requireNonNull(listenerModel);
 
@@ -149,15 +150,17 @@ public class EventPublisherCenter {
 	}
 
 	/**
-	 * 在一个上下文将事件和监听器进行绑定，如果上下文不存在则创建
+	 * 在一个上下文将事件和监听器进行绑定，如果上下文不存在则创建<br>
+	 * 同时可以为监听器绑定操作
 	 *
-	 * @param name     上下文标识
-	 * @param type     事件类型
-	 * @param listener 监听器
-	 * @param <E>      事件类型
-	 * @param <R>      监听器返回值
+	 * @param name           上下文标识
+	 * @param type           事件类型
+	 * @param listener       监听器
+	 * @param eventProcessor 监听器的前置操作和后置操作，如果为null则使用默认的处理器
+	 * @param <E>            事件类型
+	 * @param <R>            监听器返回值
 	 */
-	public <E, R> void bind(String name, Type type, Listener<E, R> listener, @Nullable EventProcessor<E, R> eventProcessor) {
+	public <E, R> void bind(String name, Type type, Listener<E, R> listener, EventProcessor<E, R> eventProcessor) {
 		Objects.requireNonNull(name);
 		Objects.requireNonNull(listener);
 
@@ -171,11 +174,11 @@ public class EventPublisherCenter {
 
 	/**
 	 * 将一个实例o中的方法转换成监听器并进行绑定<br>
-	 * 该方法必须被{@link EventListener}注解标注
+	 * 该方法必须被{@link java.util.EventListener}注解标注
 	 *
 	 * @param name   上下文标识
 	 * @param method 用作监听器的方法
-	 * @param o      获取对象中可以带有{@link EventListener}注解的方法，并解析和绑定
+	 * @param o      获取对象中可以带有{@link java.util.EventListener}注解的方法，并解析和绑定
 	 * @param <E>    监听器
 	 * @param <R>    事件类型
 	 * @throws NullPointerException 找不到注解时
@@ -184,16 +187,20 @@ public class EventPublisherCenter {
 		Objects.requireNonNull(method);
 		Objects.requireNonNull(name);
 		Objects.requireNonNull(o);
+		// 只能去代理 PUBLIC 标识的方法
+		if (method.getModifiers() != Modifier.PUBLIC){
+			return;
+		}
 		Listener<E, R> listenerProxy = newListenerProxy(o, method);
-		EventListener eventListener = method.getAnnotation(EventListener.class);
+		java.util.EventListener eventListener = method.getAnnotation(java.util.EventListener.class);
 		// 事件类型
 		Class<?> value = eventListener.value();
 		Class<?>[] arguments = eventListener.arguments();
 		Type type = value;
 		if (ArrayUtil.isEmpty(arguments)) {
-			type = new ParameterizedTypeImpl(arguments, value, null);
+			type = ParameterizedTypeImpl.make(value, arguments, null);
 		}
-		ListenerModel<E, R> listenerModel = createListener(listenerProxy)
+		ListenerBuilder<E, R> listenerModel = createListener(listenerProxy)
 			.order(eventListener.order())
 			.async(eventListener.isAsync())
 			.spreadPattern(ReflectUtil.newInstance(eventListener.spread().getName()));
@@ -201,17 +208,17 @@ public class EventPublisherCenter {
 		String throwHandlerName = eventListener.throwHandler();
 		Method throwMethod = ReflectUtil.getMethodByName(o.getClass(), throwHandlerName);
 		if (throwMethod != null) {
-			listenerModel.fn(throwable -> ReflectUtil.invoke(o, throwMethod, throwable));
+			listenerModel.throwableFn(throwable -> ReflectUtil.invoke(o, throwMethod, throwable));
 		}
 		// 绑定
 		bind(name, type, listenerModel);
 	}
 
 	/**
-	 * 将一个实例o中所有带有{@link  EventListener}注释的方法转换成监听器并进行绑定
+	 * 将一个实例o中所有带有{@link  java.util.EventListener}注释的方法转换成监听器并进行绑定
 	 *
 	 * @param name 上下文标识
-	 * @param o    获取对象中可以带有{@link EventListener}注解的方法，并解析和绑定
+	 * @param o    获取对象中可以带有{@link java.util.EventListener}注解的方法，并解析和绑定
 	 */
 	public void bind(String name, Object o) {
 		Objects.requireNonNull(name);
@@ -238,7 +245,7 @@ public class EventPublisherCenter {
 	 * @param <E>           事件类型
 	 * @param <R>           监听器返回值
 	 */
-	public <E, R> void unbind(String name, Type type, ListenerModel<E, R> listenerModel) {
+	public <E, R> void unbind(String name, Type type, ListenerBuilder<E, R> listenerModel) {
 		Objects.requireNonNull(name);
 		Objects.requireNonNull(listenerModel);
 		EventContext context = createContext(name);

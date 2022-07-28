@@ -106,6 +106,7 @@ public class DefaultContext implements EventContext {
 		ListenerDecorate<Object, Object> objectListener = listenerDecorate(listener);
 		Set<ListenerDecorate<Object, Object>> listeners = listenerMap.get(type);
 		if (listeners != null) {
+			listeners.removeIf(next -> Objects.equals(next, listener));
 			listeners.remove(objectListener);
 			// 当type没有与其关联的监听器时移除map中的type
 			if (listeners.isEmpty()) {
@@ -156,10 +157,18 @@ public class DefaultContext implements EventContext {
 			.collect(Collectors.toList());
 		Collection<Listener<E, Object>> listener = listenerPattern.getListener(type, listeners);
 		// 后续的操作中需要用到 ListenerDecorate 的部分，监听模式不应忽略这些重要的属性
-		return listenerSet.stream()
-			.filter(o -> listener.contains(o.getListener()))
+		return listenerSet.stream().filter(o -> {
+				Listener<Object, Object> oListener = o.getListener();
+				for (Listener<E, Object> l : listener) {
+					// 受到代理的影响如果直接使用equals判断可能会有影响
+					if (oListener == l || oListener.equals(l)) {
+						return true;
+					}
+				}
+				return false;
+			})
 			.map(o -> (Listener<E, Object>) o)
-			.collect(Collectors.toList());
+			.sorted().collect(Collectors.toList());
 	}
 
 	@Override
@@ -196,6 +205,7 @@ public class DefaultContext implements EventContext {
 			listener.getEventProcessor().before(event, listener);
 			SpreadPattern spreadPattern = listener.getSpreadPattern();
 			R r = listener.execEvent(event);
+			listener.result(r);
 			if (r == null) {
 				return;
 			}

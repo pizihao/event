@@ -7,7 +7,8 @@ import java.util.concurrent.Future;
 
 /**
  * 传播模式<br>
- * 他决定了监听器执行事件完成后的传播机制
+ * 决定了监听器执行事件完成后的传播机制<br>
+ * 在整个监听器完成之后可以通过其所在的上下文重新绑定，解绑或发布事件<br>
  *
  * @author Create by liuwenhao on 2022/7/20 12:24
  * @see NoSpreadPattern

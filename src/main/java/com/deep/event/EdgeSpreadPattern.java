@@ -2,7 +2,7 @@ package com.deep.event;
 
 /**
  * 边缘传播<br>
- * 除非返回事件自身或同类型的实例，否则传播
+ * 除非返回事件自身或完全同类型的实例，否则会将其返回值按照{@link SpreadPattern#publishEvents(EventContext, Object)}的逻辑继续发布
  *
  * @author Create by liuwenhao on 2022/7/21 17:10
  */

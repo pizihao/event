@@ -9,7 +9,7 @@ import java.util.Collections;
 
 /**
  * 独占模式<br>
- * 仅将事件传递给首个监听器
+ * 仅将事件传递给优先级最高的监听器，如果存在多个同等优先级的监听器则传递给第一个<br>，
  *
  * @author Create by liuwenhao on 2022/7/21 14:23
  */
