@@ -1,11 +1,8 @@
 package com.deep.event;
 
-import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.lang.Opt;
-import cn.hutool.core.thread.ThreadUtil;
-
 import java.lang.reflect.Type;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -74,7 +71,9 @@ public class TypeDefaultContext implements TypeEventContext {
 		ListenerDecorate<Object, Object> objectListener = listenerDecorate(listener);
 		listenerMap.compute(type, (t, lSet) -> {
 			if (lSet == null) {
-				return CollUtil.set(true, objectListener);
+				Set<ListenerDecorate<Object, Object>> decorates = new HashSet<>();
+				decorates.add(objectListener);
+				return decorates;
 			} else {
 				lSet.add(objectListener);
 				return lSet;
@@ -142,13 +141,12 @@ public class TypeDefaultContext implements TypeEventContext {
 	@SuppressWarnings("unchecked")
 	public <E> Collection<Listener<E, Object>> getListeners(Type type) {
 		// 获取对应的监听器
-		Set<ListenerDecorate<Object, Object>> listenerSet = Opt.ofNullable(listenerMap.get(type))
-			.orElse(null);
+		Set<ListenerDecorate<Object, Object>> listenerSet = listenerMap.get(type);
 		if (listenerSet == null) {
 			return Collections.emptyList();
 		}
 		// 获取对应的监听模式
-		ListenerPattern listenerPattern = Opt.ofNullable(listenerPatternMap.get(type))
+		ListenerPattern listenerPattern = Optional.ofNullable(listenerPatternMap.get(type))
 			.orElse(DEFAULT_LISTENER_PATTERN);
 		// 提取内部的监听器实例
 		List<Listener<E, Object>> listeners = listenerSet.stream()
@@ -190,7 +188,7 @@ public class TypeDefaultContext implements TypeEventContext {
 
 		ListenerDecorate<E, R> listenerDecorate = (ListenerDecorate<E, R>) listener;
 		if (listenerDecorate.isAsync()) {
-			ThreadUtil.execAsync(() -> doExecute(listenerDecorate, o));
+			CompletableFuture.runAsync(() -> doExecute(listenerDecorate, o));
 		} else {
 			doExecute(listenerDecorate, o);
 		}

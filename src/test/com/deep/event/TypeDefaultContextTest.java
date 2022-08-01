@@ -1,12 +1,12 @@
 package com.deep.event;
 
-import lombok.*;
 import org.junit.Assert;
 import org.junit.Test;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
+import java.util.EventObject;
 import java.util.concurrent.TimeUnit;
 
 public class TypeDefaultContextTest {
@@ -223,10 +223,7 @@ public class TypeDefaultContextTest {
 		Assert.assertEquals("删除事件", stringDeleteEvent.getName());
 	}
 
-	@Getter
-	@Setter
-	@ToString
-	static class AddEvent extends Event {
+	static class AddEvent extends EventObject {
 
 		private String name;
 
@@ -234,11 +231,23 @@ public class TypeDefaultContextTest {
 			super(source);
 			this.name = name;
 		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return "AddEvent{" +
+				"name='" + name + '\'' +
+				'}';
+		}
 	}
 
-	@Getter
-	@Setter
-	@ToString
 	static class UpdateEvent {
 
 		private String name;
@@ -246,11 +255,23 @@ public class TypeDefaultContextTest {
 		UpdateEvent(String name) {
 			this.name = name;
 		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return "UpdateEvent{" +
+				"name='" + name + '\'' +
+				'}';
+		}
 	}
 
-	@Getter
-	@Setter
-	@ToString
 	static class AsyncEvent {
 
 		private String name;
@@ -258,16 +279,43 @@ public class TypeDefaultContextTest {
 		AsyncEvent(String name) {
 			this.name = name;
 		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return "AsyncEvent{" +
+				"name='" + name + '\'' +
+				'}';
+		}
 	}
 
-	@Getter
-	@Setter
-	@ToString
 	static class DeleteEvent<T> {
 		T name;
 
 		public DeleteEvent(T name) {
 			this.name = name;
+		}
+
+		public T getName() {
+			return name;
+		}
+
+		public void setName(T name) {
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return "DeleteEvent{" +
+				"name=" + name +
+				'}';
 		}
 	}
 

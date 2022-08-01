@@ -1,7 +1,5 @@
 package com.deep.event;
 
-import cn.hutool.core.exceptions.ExceptionUtil;
-
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -51,7 +49,7 @@ class ListenerDecorate<E, R> implements Listener<E, R>, Comparable<ListenerDecor
 	 * 异常的处理
 	 */
 	Function<Throwable, R> fn = t -> {
-		throw ExceptionUtil.wrapRuntime(t);
+		throw new RuntimeException(t);
 	};
 
 	/**

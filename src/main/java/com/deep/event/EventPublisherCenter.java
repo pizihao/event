@@ -1,7 +1,6 @@
 package com.deep.event;
 
-import cn.hutool.core.util.ArrayUtil;
-import cn.hutool.core.util.ReflectUtil;
+
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import java.lang.reflect.Method;
@@ -196,7 +195,7 @@ public class EventPublisherCenter {
 		Class<?> value = eventListener.value();
 		Class<?>[] arguments = eventListener.arguments();
 		Type type = value;
-		if (ArrayUtil.isEmpty(arguments)) {
+		if (arguments.length != 0) {
 			type = ParameterizedTypeImpl.make(value, arguments, null);
 		}
 		ListenerBuilder<E, R> listenerModel = createListener(listenerProxy)
@@ -227,7 +226,7 @@ public class EventPublisherCenter {
 			o.getClass(),
 			m -> m.getAnnotation(EventListener.class) != null
 		);
-		if (methods == null || methods.length == 0) {
+		if (methods.length == 0) {
 			return;
 		}
 		for (Method method : methods) {

@@ -1,8 +1,5 @@
 package com.deep.event;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 import org.junit.Assert;
 import org.junit.Test;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
@@ -125,14 +122,26 @@ public class EventUtilTest {
 		Assert.assertNotEquals("向上修改修改", upEvent.getName());
 	}
 
-	@Getter
-	@Setter
-	@ToString
 	static class UpEvent {
 		private String name;
 
 		UpEvent(String name) {
 			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return "AddEvent{" +
+				"name='" + name + '\'' +
+				'}';
 		}
 	}
 
