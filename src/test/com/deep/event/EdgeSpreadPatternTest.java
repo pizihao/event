@@ -1,12 +1,9 @@
 package com.deep.event;
 
-import cn.hutool.core.collection.ListUtil;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -17,9 +14,11 @@ public class EdgeSpreadPatternTest {
 		TypeEventContext context = new TypeDefaultContext("name");
 		BirdEvent birdEvent = new BirdEvent("鸟事件");
 		BirdAsyncEvent birdAsyncEvent = new BirdAsyncEvent("异步鸟事件");
+		List<BirdEvent> events = new ArrayList<>();
+		events.add(birdEvent);
 		// 集合按照元素的类型发布事件
 		Listener<DogEvent, List<BirdEvent>> listener = ListenerDecorate.<DogEvent, List<BirdEvent>>build()
-			.listener(e -> ListUtil.of(birdEvent));
+			.listener(e -> events);
 		context.bind(DogEvent.class, listener);
 
 		// 异步方法按照结果类型发布事件
@@ -47,9 +46,6 @@ public class EdgeSpreadPatternTest {
 	}
 
 
-	@Getter
-	@Setter
-	@ToString
 	static class DogEvent {
 
 		private String name;
@@ -57,11 +53,23 @@ public class EdgeSpreadPatternTest {
 		DogEvent(String name) {
 			this.name = name;
 		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return "DogEvent{" +
+				"name='" + name + '\'' +
+				'}';
+		}
 	}
 
-	@Getter
-	@Setter
-	@ToString
 	static class BirdEvent {
 
 		private String name;
@@ -69,17 +77,44 @@ public class EdgeSpreadPatternTest {
 		BirdEvent(String name) {
 			this.name = name;
 		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return "BirdEvent{" +
+				"name='" + name + '\'' +
+				'}';
+		}
 	}
 
-	@Getter
-	@Setter
-	@ToString
 	static class BirdAsyncEvent {
 
 		private String name;
 
 		BirdAsyncEvent(String name) {
 			this.name = name;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String toString() {
+			return "BirdAsyncEvent{" +
+				"name='" + name + '\'' +
+				'}';
 		}
 	}
 }
