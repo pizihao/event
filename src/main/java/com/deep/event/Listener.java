@@ -21,5 +21,5 @@ public interface Listener<E, R> extends EventListener {
 	 * @return 任意类型的返回值，改返回值可以通过{@link SpreadPattern}的设置生成新的事件进行发布
 	 */
 	R execEvent(E e);
-	
+
 }

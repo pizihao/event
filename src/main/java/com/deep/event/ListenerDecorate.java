@@ -172,6 +172,6 @@ class ListenerDecorate<E, R> implements Listener<E, R>, Comparable<ListenerDecor
 
 	@Override
 	public int hashCode() {
-		return listener.hashCode();
+		return Objects.hash(order, listener);
 	}
 }

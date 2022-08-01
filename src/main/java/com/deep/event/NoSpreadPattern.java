@@ -9,7 +9,7 @@ public class NoSpreadPattern implements SpreadPattern {
 
 
 	@Override
-	public <E, R> void spread(EventContext context, R r, E e) {
+	public <E, R> void spread(TypeEventContext context, R r, E e) {
 		// 不传播，什么都不做
 	}
 }

@@ -28,7 +28,7 @@ public interface SpreadPattern {
 	 * @param <E>     事件类型
 	 * @throws Throwable 过程中产生的异常
 	 */
-	<E, R> void spread(EventContext context, R r, E e) throws Throwable;
+	<E, R> void spread(TypeEventContext context, R r, E e) throws Throwable;
 
 
 	/**
@@ -46,7 +46,7 @@ public interface SpreadPattern {
 	 * @param o       事件
 	 * @throws Throwable 过程中产生的异常
 	 */
-	default void publishEvents(EventContext context, Object o) throws Throwable {
+	default void publishEvents(TypeEventContext context, Object o) throws Throwable {
 		if (o == null) {
 			return;
 		}

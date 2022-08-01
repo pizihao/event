@@ -30,7 +30,7 @@ public class EventUtil {
 	static final String DEFAULT_NAME = "DEFAULT_EVENT_CONTEXT";
 
 	static {
-		publisherCenter.contextMap.put(DEFAULT_NAME, new DefaultContext(DEFAULT_NAME));
+		publisherCenter.contextMap.put(DEFAULT_NAME, new TypeDefaultContext(DEFAULT_NAME));
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class EventUtil {
 	 *
 	 * @return EventPublisherCenter
 	 */
-	public static EventContext eventContext() {
+	public static TypeEventContext eventContext() {
 		return publisherCenter.getContext(DEFAULT_NAME);
 	}
 
@@ -56,7 +56,7 @@ public class EventUtil {
 	 *
 	 * @return 被删除的上下文
 	 */
-	public static EventContext clear() {
+	public static TypeEventContext clear() {
 		return publisherCenter.clearContext(DEFAULT_NAME);
 	}
 
@@ -78,7 +78,7 @@ public class EventUtil {
 	 * @param o 获取对象中可以带有{@link EventListener}注解的方法，并解析和绑定
 	 * @return 默认上下文
 	 */
-	public static EventContext bind(Object o) {
+	public static TypeEventContext bind(Object o) {
 		publisherCenter.bind(DEFAULT_NAME, o);
 		return eventContext();
 	}
@@ -92,7 +92,7 @@ public class EventUtil {
 	 * @return 默认上下文
 	 * @throws NullPointerException 找不到注解时
 	 */
-	public static EventContext bind(Method method, Object o) {
+	public static TypeEventContext bind(Method method, Object o) {
 		publisherCenter.bind(DEFAULT_NAME, method, o);
 		return eventContext();
 	}
@@ -107,7 +107,7 @@ public class EventUtil {
 	 * @param <R>             监听器返回值
 	 * @return 默认上下文
 	 */
-	public static <E, R> EventContext bind(Type type, ListenerBuilder<E, R> listenerBuilder) {
+	public static <E, R> TypeEventContext bind(Type type, ListenerBuilder<E, R> listenerBuilder) {
 		publisherCenter.bind(DEFAULT_NAME, type, listenerBuilder);
 		return eventContext();
 	}
@@ -121,7 +121,7 @@ public class EventUtil {
 	 * @param <R>      监听器返回值
 	 * @return 默认上下文
 	 */
-	public static <E, R> EventContext bind(Type type, Listener<E, R> listener) {
+	public static <E, R> TypeEventContext bind(Type type, Listener<E, R> listener) {
 		publisherCenter.bind(DEFAULT_NAME, type, listener, new NoEventProcessor<>());
 		return eventContext();
 	}
@@ -135,7 +135,7 @@ public class EventUtil {
 	 * @param <R>      监听器返回值
 	 * @return 默认上下文
 	 */
-	public static <E, R> EventContext bind(Type type, Listener<E, R> listener, EventProcessor<E, R> processor) {
+	public static <E, R> TypeEventContext bind(Type type, Listener<E, R> listener, EventProcessor<E, R> processor) {
 		publisherCenter.bind(DEFAULT_NAME, type, listener, processor);
 		return eventContext();
 	}
@@ -149,7 +149,7 @@ public class EventUtil {
 	 * @param <R>     监听器返回值
 	 * @return 默认上下文
 	 */
-	public static <E, R> EventContext unbind(Type type, ListenerBuilder<E, R> builder) {
+	public static <E, R> TypeEventContext unbind(Type type, ListenerBuilder<E, R> builder) {
 		publisherCenter.unbind(DEFAULT_NAME, type, builder);
 		return eventContext();
 	}
@@ -163,7 +163,7 @@ public class EventUtil {
 	 * @param <R>      监听器返回值
 	 * @return 默认上下文
 	 */
-	public static <E, R> EventContext unbind(Type type, Listener<E, R> listener) {
+	public static <E, R> TypeEventContext unbind(Type type, Listener<E, R> listener) {
 		publisherCenter.unbind(DEFAULT_NAME, type, listener);
 		return eventContext();
 	}
@@ -174,8 +174,8 @@ public class EventUtil {
 	 * @param type 事件类型
 	 * @return 默认上下文
 	 */
-	public static EventContext unbindAll(Type type) {
-		EventContext context = publisherCenter.createContext(DEFAULT_NAME);
+	public static TypeEventContext unbindAll(Type type) {
+		TypeEventContext context = publisherCenter.createContext(DEFAULT_NAME);
 		context.unbindAll(type);
 		return eventContext();
 	}

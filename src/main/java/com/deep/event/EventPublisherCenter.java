@@ -21,7 +21,7 @@ public class EventPublisherCenter {
 	/**
 	 * 所有的上下文
 	 */
-	Map<String, EventContext> contextMap = new HashMap<>();
+	Map<String, TypeEventContext> contextMap = new HashMap<>();
 
 	static final String LISTENER_METHOD_NAME = "execEvent";
 
@@ -30,7 +30,7 @@ public class EventPublisherCenter {
 	 *
 	 * @param contextMap 上下文映射表
 	 */
-	public EventPublisherCenter(Map<String, EventContext> contextMap) {
+	public EventPublisherCenter(Map<String, TypeEventContext> contextMap) {
 		this.contextMap = contextMap;
 	}
 
@@ -45,7 +45,7 @@ public class EventPublisherCenter {
 	 * @param name 名称，上下文唯一标识
 	 * @return name对应的上下文
 	 */
-	public EventContext getContext(String name) {
+	public TypeEventContext getContext(String name) {
 		Objects.requireNonNull(name);
 		return contextMap.get(name);
 	}
@@ -56,9 +56,9 @@ public class EventPublisherCenter {
 	 * @param name 名称，上下文唯一标识
 	 * @return name对应的上下文
 	 */
-	public EventContext createContext(String name) {
+	public TypeEventContext createContext(String name) {
 		Objects.requireNonNull(name);
-		return contextMap.computeIfAbsent(name, DefaultContext::new);
+		return contextMap.computeIfAbsent(name, TypeDefaultContext::new);
 	}
 
 	/**
@@ -69,7 +69,7 @@ public class EventPublisherCenter {
 	 *                false：不覆盖
 	 * @return 最终加入映射表的上下文
 	 */
-	public EventContext addContext(EventContext context, boolean cover) {
+	public TypeEventContext addContext(TypeEventContext context, boolean cover) {
 		Objects.requireNonNull(context);
 		if (cover) {
 			contextMap.put(context.name(), context);
@@ -85,8 +85,8 @@ public class EventPublisherCenter {
 	 * @param name 上下文标识
 	 * @return 被删除的上下文
 	 */
-	public EventContext clearContext(String name) {
-		EventContext context = contextMap.get(name);
+	public TypeEventContext clearContext(String name) {
+		TypeEventContext context = contextMap.get(name);
 		if (Objects.nonNull(context)) {
 			context.clear();
 		}
@@ -99,7 +99,7 @@ public class EventPublisherCenter {
 	 * @param name 上下文标识
 	 * @return 被删除的上下文
 	 */
-	public EventContext removeContext(String name) {
+	public TypeEventContext removeContext(String name) {
 		return contextMap.remove(name);
 	}
 
@@ -114,7 +114,7 @@ public class EventPublisherCenter {
 	 */
 	public void setListenerPattern(String name, Type type, ListenerPattern listenerPattern) {
 		if (contextMap.containsKey(name)) {
-			EventContext context = contextMap.get(name);
+			TypeEventContext context = contextMap.get(name);
 			context.setListenerPattern(type, listenerPattern);
 		}
 	}
@@ -144,7 +144,7 @@ public class EventPublisherCenter {
 		Objects.requireNonNull(name);
 		Objects.requireNonNull(listenerModel);
 
-		EventContext context = createContext(name);
+		TypeEventContext context = createContext(name);
 		context.bind(type, listenerModel.listenerDecorate());
 	}
 
@@ -163,7 +163,7 @@ public class EventPublisherCenter {
 		Objects.requireNonNull(name);
 		Objects.requireNonNull(listener);
 
-		EventContext context = createContext(name);
+		TypeEventContext context = createContext(name);
 		ListenerDecorate<E, R> listenerDecorate = ListenerDecorate
 			.<E, R>build()
 			.eventProcessor(eventProcessor)
@@ -247,7 +247,7 @@ public class EventPublisherCenter {
 	public <E, R> void unbind(String name, Type type, ListenerBuilder<E, R> listenerModel) {
 		Objects.requireNonNull(name);
 		Objects.requireNonNull(listenerModel);
-		EventContext context = createContext(name);
+		TypeEventContext context = createContext(name);
 		context.unbind(type, listenerModel.listenerDecorate());
 	}
 
@@ -264,7 +264,7 @@ public class EventPublisherCenter {
 		Objects.requireNonNull(name);
 		Objects.requireNonNull(listener);
 
-		EventContext context = createContext(name);
+		TypeEventContext context = createContext(name);
 		ListenerDecorate<E, R> listenerDecorate = ListenerDecorate
 			.<E, R>build()
 			.listener(listener);
@@ -279,7 +279,7 @@ public class EventPublisherCenter {
 	 */
 	public void unbindAll(String name, Type type) {
 		Objects.requireNonNull(name);
-		EventContext context = createContext(name);
+		TypeEventContext context = createContext(name);
 		context.unbindAll(type);
 	}
 
@@ -292,7 +292,7 @@ public class EventPublisherCenter {
 	 * @param event 事件实例
 	 */
 	public void publish(String name, Object event) {
-		EventContext context = getContext(name);
+		TypeEventContext context = getContext(name);
 		if (context != null) {
 			context.publish(event);
 		}
@@ -307,7 +307,7 @@ public class EventPublisherCenter {
 	 * @param type  事件类型
 	 */
 	public void publish(String name, Object event, Type type) {
-		EventContext context = getContext(name);
+		TypeEventContext context = getContext(name);
 		if (context != null) {
 			context.publish(event, type);
 		}
