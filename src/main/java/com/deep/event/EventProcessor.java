@@ -12,7 +12,6 @@ package com.deep.event;
  *
  * @author Create by liuwenhao on 2022/7/25 15:56
  * @see NoEventProcessor
- * @see TransactionalEventProcessor
  */
 public interface EventProcessor<E, R> {
 
