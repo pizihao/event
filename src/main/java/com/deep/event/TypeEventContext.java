@@ -10,6 +10,6 @@ import java.util.Collection;
  *
  * @author Create by liuwenhao on 2022/7/20 13:11
  */
-public interface TypeEventContext<T> extends EventContext<T>, TypeEventPublisher {
+public interface TypeEventContext extends EventContext<Type>, TypeEventPublisher {
 
 }

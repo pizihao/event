@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  *
  * @author Create by liuwenhao on 2022/7/20 14:45
  */
-public class TypeDefaultContext implements TypeEventContext<Type>, TypeEventPublisher {
+public class TypeDefaultContext implements TypeEventContext, TypeEventPublisher {
 
     static final ListenerPattern DEFAULT_LISTENER_PATTERN = new BroadcastListenerPattern();
     static final SpreadPattern DEFAULT_SPREAD_PATTERN = new EdgeSpreadPattern();
