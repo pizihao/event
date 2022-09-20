@@ -10,62 +10,6 @@ import java.util.Collection;
  *
  * @author Create by liuwenhao on 2022/7/20 13:11
  */
-public interface TypeEventContext extends TypeEventPublisher {
-
-	/**
-	 * 提取上下文的唯一标识
-	 *
-	 * @return name
-	 */
-	String name();
-
-	/**
-	 * 修改事件的监听模式
-	 *
-	 * @param type            事件类型
-	 * @param listenerPattern 事件监听模式
-	 */
-	void setListenerPattern(Type type, ListenerPattern listenerPattern);
-
-	/**
-	 * 为一个事件绑定监听器
-	 *
-	 * @param type     事件类型
-	 * @param listener 监听器
-	 * @param <E>      事件类型
-	 * @param <R>      监听器返回类型
-	 */
-	<E, R> void bind(Type type, Listener<E, R> listener);
-
-	/**
-	 * 为一个事件解绑监听器
-	 *
-	 * @param type     事件类型
-	 * @param listener 监听器
-	 * @param <E>      事件类型
-	 * @param <R>      监听器返回类型
-	 */
-	<E, R> void unbind(Type type, Listener<E, R> listener);
-
-	/**
-	 * 为一个事件解绑所有监听器
-	 *
-	 * @param type 事件类型
-	 */
-	void unbindAll(Type type);
-
-	/**
-	 * 清空当前的上下文
-	 */
-	void clear();
-
-	/**
-	 * 获取与一个事件绑定所有的监听器
-	 *
-	 * @param type 事件类型
-	 * @param <E>  事件类型
-	 * @return 监听器集合
-	 */
-	<E> Collection<Listener<E, Object>> getListeners(Type type);
+public interface TypeEventContext<T> extends EventContext<T>, TypeEventPublisher {
 
 }

@@ -11,7 +11,7 @@ public interface TopicEventPublisher extends EventPublisher {
      * 发布事件<br>
      * 通过主题匹配具体的监听器
      *
-     * @param topic 主题
+     * @param topic 主题，主题需要是一个具有标识作用的字符串
      */
-    void publish(Object topic);
+    void publish(String topic);
 }

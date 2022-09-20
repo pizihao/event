@@ -22,7 +22,6 @@ public interface TypeEventPublisher extends EventPublisher {
 	 *
 	 * @param o 事件实例
 	 */
-	@Override
 	default void publish(Object o) {
 		publish(o, o.getClass());
 	}
